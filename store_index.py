@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import os
-from src.helper import load_pdf_files, text_split
+from src.helper import load_pdf_file, text_split
 from pinecone import Pinecone, ServerlessSpec
 from langchain_pinecone import PineconeVectorStore
 from langchain.embeddings import HuggingFaceEmbeddings
@@ -30,14 +30,14 @@ def filter_to_minimal_docs(docs: List[Document]) -> List[Document]:
             )
     return minimal_docs
 
-extracted_data = load_pdf_files(data='data')
+extracted_data = load_pdf_file(data='data')
 filter_data = filter_to_minimal_docs(extracted_data)
 text_chunks = text_split(filter_data)
 
 embeddings = download_hugging_face_embeddings()
 
 pc = Pinecone(api_key=PINECONE_API_KEY)
-index_name = "medi--guide-bot"
+index_name = "medi-guide-bot"
 
 if not pc.has_index(index_name):
     pc.create_index(
