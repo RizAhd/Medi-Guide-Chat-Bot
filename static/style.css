@@ -134,14 +134,14 @@
         /* Theme Toggle */
         .theme-toggle-container {
             position: fixed;
-            top: 30px;
-            right: 30px;
+            top: 78px;
+            right: 290px;
             z-index: 1000;
         }
 
         .theme-toggle {
-            width: 56px;
-            height: 56px;
+            width: 36px;
+            height: 36px;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-full);
