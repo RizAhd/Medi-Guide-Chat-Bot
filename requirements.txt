@@ -1,9 +1,5 @@
-# Web framework
 Flask==3.1.1
 gunicorn==21.2.0
-
-# LangChain updated community package
-langchain-community==0.3.26
 
 # AI & embeddings
 openai==1.109.1
@@ -11,12 +7,15 @@ sentence-transformers==4.1.0
 transformers==4.57.3
 torch==2.9.1
 
-# Pinecone for vector DB
-pinecone-client==7.3.0
+# LangChain community
+langchain-community==0.3.26
+
+# Pinecone vector DB (Python 3.13 compatible)
+pinecone-client==2.2.4
+
+# PDF & file handling
+pypdf==5.6.1
+fsspec==2025.12.0
 
 # Environment variables
 python-dotenv==1.1.0
-
-# PDF & file loading
-pypdf==5.6.1
-fsspec==2025.12.0
