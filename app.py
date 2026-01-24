@@ -18,31 +18,28 @@ OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 os.environ["PINECONE_API_KEY"] = PINECONE_API_KEY
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
-# Initialize embeddings
+
 embeddings = download_hugging_face_embeddings()
 
-# Connect to Pinecone index
 index_name = "medi-guide-bot"
 docsearch = PineconeVectorStore.from_existing_index(
     index_name=index_name,
     embedding=embeddings
 )
 
-# Retriever for RAG
+
 retriever = docsearch.as_retriever(
     search_type="similarity",
     search_kwargs={"k": 3}
 )
 
-# Chat model
 chat_model = ChatOpenAI(model="gpt-4o", temperature=0.3)
 
-# Memory store per session
 memory_store = {}
 
 def get_memory(session_id):
     if session_id not in memory_store:
-        # Keeps full conversation for session
+
         memory_store[session_id] = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
     return memory_store[session_id]
 
@@ -57,7 +54,6 @@ def chat():
 
     memory = get_memory(session_id)
 
-    # ConversationalRetrievalChain handles RAG + memory
     conv_chain = ConversationalRetrievalChain.from_llm(
         llm=chat_model,
         retriever=retriever,
