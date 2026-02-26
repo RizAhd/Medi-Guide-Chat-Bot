@@ -3,13 +3,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-      <link rel="shortcut icon" href="mediguide.png" type="image/png">
-     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="../static/styles.css">
+    <link rel="shortcut icon" href="mediguide.png" type="image/png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <title>MediGuide · Medical AI</title>
     
@@ -18,8 +17,8 @@
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <!-- Custom CSS - FIXED PATH -->
+   
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="light-theme">
@@ -62,7 +61,7 @@
 
         <!-- Main Chat Interface -->
         <div class="chat-interface">
-            <!-- Sidebar -->
+            <!-- Sidebar (Slide-out on mobile) -->
             <aside class="chat-sidebar" id="chatSidebar">
                 <div class="knowledge-panel">
                     <div class="panel-header">
@@ -127,12 +126,12 @@
                     <div class="quick-queries">
                         <h4>Quick Questions</h4>
                         <div class="queries-grid">
-                            <button class="query-chip" data-query="What are the symptoms of diabetes?">Diabetes</button>
-                            <button class="query-chip" data-query="How to treat anxiety?">Anxiety</button>
-                            <button class="query-chip" data-query="Child vaccination schedule?">Vaccines</button>
-                            <button class="query-chip" data-query="Heart healthy diet?">Heart Health</button>
-                            <button class="query-chip" data-query="COVID-19 symptoms?">COVID-19</button>
-                            <button class="query-chip" data-query="How to lower blood pressure?">BP</button>
+                            <button class="query-chip" data-query="Diabetes symptoms?">Diabetes</button>
+                            <button class="query-chip" data-query="Anxiety treatment?">Anxiety</button>
+                            <button class="query-chip" data-query="Vaccine schedule?">Vaccines</button>
+                            <button class="query-chip" data-query="Heart diet?">Heart Health</button>
+                            <button class="query-chip" data-query="COVID symptoms?">COVID-19</button>
+                            <button class="query-chip" data-query="Blood pressure?">BP</button>
                         </div>
                     </div>
                 </div>
@@ -168,7 +167,7 @@
 
                 <!-- Chat Messages Container -->
                 <div class="chat-messages" id="chatMessages">
-                    <!-- Welcome Section -->
+                    <!-- Welcome Section - Compact -->
                     <div class="welcome-section">
                         <div class="welcome-content">
                             <h1>Welcome to MediGuide</h1>
@@ -268,6 +267,7 @@
             const chatMessages = document.getElementById('chatMessages');
             const messageForm = document.getElementById('messageForm');
             const userInput = document.getElementById('userInput');
+            const sendBtn = document.getElementById('sendBtn');
             const newChatBtn = document.getElementById('newChatBtn');
             const menuToggle = document.getElementById('menuToggle');
             const chatSidebar = document.getElementById('chatSidebar');
@@ -278,7 +278,7 @@
             let isTyping = false;
             let messageCount = 0;
             
-            // Theme Management
+            // Theme Management - Default to light
             const savedTheme = localStorage.getItem('mediguide-theme') || 'light';
             if (savedTheme === 'dark') {
                 body.classList.remove('light-theme');
@@ -301,7 +301,9 @@
             function updateTime() {
                 const now = new Date();
                 const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                if (currentTimeSpan) currentTimeSpan.textContent = timeString;
+                if (currentTimeSpan) {
+                    currentTimeSpan.textContent = timeString;
+                }
             }
             updateTime();
             setInterval(updateTime, 60000);
@@ -311,11 +313,15 @@
                 userInput.style.height = 'auto';
                 userInput.style.height = Math.min(userInput.scrollHeight, 100) + 'px';
             }
+            
             userInput.addEventListener('input', autoResize);
             
             // Scroll to Bottom
-            function scrollToBottom() {
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+            function scrollToBottom(smooth = true) {
+                chatMessages.scrollTo({
+                    top: chatMessages.scrollHeight,
+                    behavior: smooth ? 'smooth' : 'auto'
+                });
             }
             
             // Add Message
@@ -346,6 +352,7 @@
                 const timeSpan = document.createElement('span');
                 timeSpan.className = 'message-time';
                 timeSpan.textContent = timeString;
+                
                 meta.appendChild(timeSpan);
                 
                 if (!isUser) {
@@ -372,9 +379,12 @@
                 scrollToBottom();
                 messageCount++;
                 
+                // Hide welcome section after first message
                 if (messageCount === 1 && isUser) {
                     const welcomeSection = document.querySelector('.welcome-section');
-                    if (welcomeSection) welcomeSection.style.display = 'none';
+                    if (welcomeSection) {
+                        welcomeSection.style.display = 'none';
+                    }
                 }
             }
             
@@ -405,13 +415,16 @@
                 typingDiv.appendChild(avatar);
                 typingDiv.appendChild(indicator);
                 typingGroup.appendChild(typingDiv);
+                
                 chatMessages.appendChild(typingGroup);
                 scrollToBottom();
             }
             
             function removeTypingIndicator() {
                 const indicator = document.getElementById('typingIndicator');
-                if (indicator) indicator.remove();
+                if (indicator) {
+                    indicator.remove();
+                }
                 isTyping = false;
             }
             
@@ -422,14 +435,13 @@
                     
                     const response = await fetch('/get', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
                         body: new URLSearchParams({ 'msg': message })
                     });
                     
-                    if (!response.ok) {
-                        const text = await response.text();
-                        throw new Error(text || 'Network error');
-                    }
+                    if (!response.ok) throw new Error('Network error');
                     
                     const data = await response.text();
                     removeTypingIndicator();
@@ -450,8 +462,10 @@
                 if (!message || isTyping) return;
                 
                 addMessage(message, true);
+                
                 userInput.value = '';
                 autoResize();
+                
                 await sendMessage(message);
             });
             
@@ -463,6 +477,7 @@
                     autoResize();
                     messageForm.dispatchEvent(new Event('submit'));
                     
+                    // Close sidebar on mobile after selection
                     if (window.innerWidth <= 768) {
                         chatSidebar.classList.remove('show');
                         sidebarOverlay.classList.remove('show');
@@ -478,6 +493,7 @@
                     autoResize();
                     messageForm.dispatchEvent(new Event('submit'));
                     
+                    // Close sidebar on mobile
                     if (window.innerWidth <= 768) {
                         chatSidebar.classList.remove('show');
                         sidebarOverlay.classList.remove('show');
@@ -498,12 +514,17 @@
             
             // New Chat Button
             newChatBtn.addEventListener('click', function() {
-                document.querySelectorAll('.message-group').forEach(group => {
-                    if (group.id !== 'initialMessage') group.remove();
+                const messageGroups = document.querySelectorAll('.message-group');
+                messageGroups.forEach(group => {
+                    if (group.id !== 'initialMessage') {
+                        group.remove();
+                    }
                 });
                 
                 const welcomeSection = document.querySelector('.welcome-section');
-                if (welcomeSection) welcomeSection.style.display = 'block';
+                if (welcomeSection) {
+                    welcomeSection.style.display = 'block';
+                }
                 
                 messageCount = 0;
                 scrollToBottom();
@@ -517,14 +538,25 @@
                 }
             });
             
-            // Health check on load
-            fetch('/health')
-                .then(res => res.json())
-                .then(data => console.log('System:', data.status))
-                .catch(err => console.log('Health check failed'));
+            // Voice (placeholder)
+            document.getElementById('voiceBtn').addEventListener('click', function() {
+                alert('Voice input coming soon');
+            });
+            
+            // Attach (placeholder)
+            document.getElementById('attachBtn').addEventListener('click', function() {
+                alert('File attachment coming soon');
+            });
+            
+            // History
+            document.getElementById('historyBtn').addEventListener('click', function() {
+                alert('Chat history coming soon');
+            });
             
             // Focus input
             userInput.focus();
+            
+            // Initial scroll
             setTimeout(scrollToBottom, 100);
         });
     </script>
