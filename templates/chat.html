@@ -1,62 +1,73 @@
-<!-- templates/chat.html -->
+<!-- templates/chat.html - WITH DEBUG CONSOLES -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="../static/styles.css">
-    <link rel="shortcut icon" href="mediguide.png" type="image/png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
-    
-    <!-- Fix deprecated meta tag -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <title>MediGuide · Medical AI</title>
     
-    <!-- IBM Plex Sans Font -->
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <!-- CORRECT static file path - ONLY ONE CSS LINK -->
+    <!-- CSS - Using url_for -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     
     <style>
-        /* Fallback styles in case CSS fails to load */
-        body {
-            font-family: 'IBM Plex Sans', sans-serif;
-            margin: 0;
-            padding: 0;
-            background: var(--bg-main, #ffffff);
+        /* Debug panel */
+        #debug-panel {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: #0f0;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 10000;
+            max-width: 400px;
+            max-height: 200px;
+            overflow: auto;
+            display: none;
         }
-        .booting-message {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            text-align: center;
-            padding: 20px;
+        #debug-panel.show {
+            display: block;
         }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #000000;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+        .debug-log {
+            border-bottom: 1px solid #333;
+            padding: 2px 0;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .debug-toggle {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: #000;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 10001;
         }
     </style>
 </head>
 <body class="light-theme">
+    <!-- Debug Toggle Button -->
+    <button class="debug-toggle" id="debugToggle">🐛 Debug</button>
+    
+    <!-- Debug Panel -->
+    <div id="debug-panel">
+        <div style="font-weight: bold; margin-bottom: 5px;">🔍 Debug Console</div>
+        <div id="debug-logs"></div>
+    </div>
+
     <!-- Theme Toggle -->
     <div class="theme-toggle-container">
         <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
@@ -96,7 +107,7 @@
 
         <!-- Main Chat Interface -->
         <div class="chat-interface">
-            <!-- Sidebar (Slide-out on mobile) -->
+            <!-- Sidebar -->
             <aside class="chat-sidebar" id="chatSidebar">
                 <div class="knowledge-panel">
                     <div class="panel-header">
@@ -111,45 +122,35 @@
                     
                     <div class="encyclopedia-grid">
                         <div class="encyclopedia-item" data-source="gale-medicine">
-                            <div class="encyclopedia-icon">
-                                <i class="fas fa-book-medical"></i>
-                            </div>
+                            <div class="encyclopedia-icon"><i class="fas fa-book-medical"></i></div>
                             <div class="encyclopedia-info">
                                 <h4>Gale Medicine</h4>
                                 <p>Diseases & Treatments</p>
                             </div>
                         </div>
                         <div class="encyclopedia-item" data-source="mental-health">
-                            <div class="encyclopedia-icon">
-                                <i class="fas fa-brain"></i>
-                            </div>
+                            <div class="encyclopedia-icon"><i class="fas fa-brain"></i></div>
                             <div class="encyclopedia-info">
                                 <h4>Mental Health</h4>
                                 <p>Psychology & Therapy</p>
                             </div>
                         </div>
                         <div class="encyclopedia-item" data-source="nursing">
-                            <div class="encyclopedia-icon">
-                                <i class="fas fa-user-nurse"></i>
-                            </div>
+                            <div class="encyclopedia-icon"><i class="fas fa-user-nurse"></i></div>
                             <div class="encyclopedia-info">
                                 <h4>Nursing & Allied</h4>
                                 <p>Patient Care</p>
                             </div>
                         </div>
                         <div class="encyclopedia-item" data-source="pediatrics">
-                            <div class="encyclopedia-icon">
-                                <i class="fas fa-baby"></i>
-                            </div>
+                            <div class="encyclopedia-icon"><i class="fas fa-baby"></i></div>
                             <div class="encyclopedia-info">
                                 <h4>Children's Health</h4>
                                 <p>Pediatrics</p>
                             </div>
                         </div>
                         <div class="encyclopedia-item" data-source="nutrition">
-                            <div class="encyclopedia-icon">
-                                <i class="fas fa-apple-alt"></i>
-                            </div>
+                            <div class="encyclopedia-icon"><i class="fas fa-apple-alt"></i></div>
                             <div class="encyclopedia-info">
                                 <h4>Nutrition</h4>
                                 <p>Diet & Wellness</p>
@@ -202,7 +203,7 @@
 
                 <!-- Chat Messages Container -->
                 <div class="chat-messages" id="chatMessages">
-                    <!-- Welcome Section - Compact -->
+                    <!-- Welcome Section -->
                     <div class="welcome-section">
                         <div class="welcome-content">
                             <h1>Welcome to MediGuide</h1>
@@ -211,30 +212,22 @@
                         
                         <div class="ai-features">
                             <div class="feature">
-                                <div class="feature-icon">
-                                    <i class="fas fa-robot"></i>
-                                </div>
+                                <div class="feature-icon"><i class="fas fa-robot"></i></div>
                                 <h4>AI-Powered</h4>
                                 <p>Medical intelligence</p>
                             </div>
                             <div class="feature">
-                                <div class="feature-icon">
-                                    <i class="fas fa-shield-alt"></i>
-                                </div>
+                                <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
                                 <h4>Private</h4>
                                 <p>Secure & encrypted</p>
                             </div>
                             <div class="feature">
-                                <div class="feature-icon">
-                                    <i class="fas fa-bolt"></i>
-                                </div>
+                                <div class="feature-icon"><i class="fas fa-bolt"></i></div>
                                 <h4>Instant</h4>
                                 <p>Real-time answers</p>
                             </div>
                             <div class="feature">
-                                <div class="feature-icon">
-                                    <i class="fas fa-graduation-cap"></i>
-                                </div>
+                                <div class="feature-icon"><i class="fas fa-graduation-cap"></i></div>
                                 <h4>Educational</h4>
                                 <p>Evidence-based</p>
                             </div>
@@ -280,418 +273,548 @@
         <div style="background: white; padding: 30px; border-radius: 10px; text-align: center; max-width: 300px;">
             <div class="loader" style="margin: 0 auto 20px;"></div>
             <h3>Starting MediGuide...</h3>
-            <p id="loadingMessage">Starting system (0/10)...</p>
+            <p id="loadingMessage">Starting system (0/20)...</p>
+            <p style="font-size: 11px; color: #666; margin-top: 10px;" id="debugInfo"></p>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // DOM Elements
-            const themeToggle = document.getElementById('themeToggle');
-            const body = document.body;
-            const chatMessages = document.getElementById('chatMessages');
-            const messageForm = document.getElementById('messageForm');
-            const userInput = document.getElementById('userInput');
-            const sendBtn = document.getElementById('sendBtn');
-            const newChatBtn = document.getElementById('newChatBtn');
-            const menuToggle = document.getElementById('menuToggle');
-            const chatSidebar = document.getElementById('chatSidebar');
-            const sidebarOverlay = document.getElementById('sidebarOverlay');
-            const statusDot = document.getElementById('statusDot');
-            const statusText = document.getElementById('statusText');
-            const loadingModal = document.getElementById('loadingModal');
-            const loadingMessage = document.getElementById('loadingMessage');
+        // Debug console
+        const debugPanel = document.getElementById('debug-panel');
+        const debugLogs = document.getElementById('debug-logs');
+        const debugToggle = document.getElementById('debugToggle');
+        let debugEnabled = false;
+
+        function addDebugLog(message, type = 'info') {
+            if (!debugEnabled) return;
             
-            // State
-            let isTyping = false;
-            let messageCount = 0;
-            let isInitialized = false;
-            let retryCount = 0;
-            const MAX_RETRIES = 20;
+            const logEntry = document.createElement('div');
+            logEntry.className = 'debug-log';
+            const timestamp = new Date().toLocaleTimeString();
+            logEntry.innerHTML = `[${timestamp}] ${type.toUpperCase()}: ${message}`;
+            debugLogs.appendChild(logEntry);
+            debugPanel.scrollTop = debugPanel.scrollHeight;
             
-            // Theme Management
-            const savedTheme = localStorage.getItem('mediguide-theme') || 'light';
-            if (savedTheme === 'dark') {
-                body.classList.remove('light-theme');
-                body.classList.add('dark-theme');
+            // Also log to browser console
+            console.log(`[DEBUG] ${message}`);
+        }
+
+        debugToggle.addEventListener('click', () => {
+            debugEnabled = !debugEnabled;
+            debugPanel.classList.toggle('show');
+            debugToggle.textContent = debugEnabled ? '🔍 Hide' : '🐛 Debug';
+            if (debugEnabled) {
+                addDebugLog('Debug mode enabled');
+                checkAllResources();
             }
+        });
+
+        // Check all resources
+        async function checkAllResources() {
+            addDebugLog('Checking resources...');
             
-            themeToggle.addEventListener('click', function() {
-                if (body.classList.contains('light-theme')) {
-                    body.classList.remove('light-theme');
-                    body.classList.add('dark-theme');
-                    localStorage.setItem('mediguide-theme', 'dark');
-                } else {
-                    body.classList.remove('dark-theme');
-                    body.classList.add('light-theme');
-                    localStorage.setItem('mediguide-theme', 'light');
-                }
-            });
+            // Check CSS
+            fetch("{{ url_for('static', filename='style.css') }}", { method: 'HEAD' })
+                .then(response => {
+                    addDebugLog(`CSS file: ${response.ok ? '✅ Found' : '❌ Not found'} (${response.status})`);
+                })
+                .catch(err => {
+                    addDebugLog(`CSS error: ${err.message}`, 'error');
+                });
             
             // Check health endpoint
-            async function checkHealth() {
-                try {
-                    const response = await fetch('/health');
-                    const data = await response.json();
+            fetch('/health')
+                .then(response => response.json())
+                .then(data => {
+                    addDebugLog(`Health endpoint: ✅ OK`);
+                    addDebugLog(`Initialized: ${data.initialized}`);
+                    addDebugLog(`Memory: ${data.memory_mb}MB`);
+                    addDebugLog(`Static files: ${JSON.stringify(data.static_files)}`);
+                })
+                .catch(err => {
+                    addDebugLog(`Health check failed: ${err.message}`, 'error');
+                });
+            
+            // Check debug endpoint
+            fetch('/debug')
+                .then(response => response.json())
+                .then(data => {
+                    addDebugLog(`Debug endpoint: ✅ OK`);
+                    addDebugLog(`Static folder: ${data.static_folder}`);
+                    addDebugLog(`Static exists: ${data.static_exists}`);
+                    addDebugLog(`Static contents: ${data.static_contents.join(', ')}`);
+                })
+                .catch(err => {
+                    addDebugLog(`Debug endpoint failed: ${err.message}`, 'error');
+                });
+        }
+
+        // Override fetch to log all requests
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            addDebugLog(`Fetching: ${args[0]}`);
+            return originalFetch.apply(this, args)
+                .then(response => {
+                    addDebugLog(`Response from ${args[0]}: ${response.status} ${response.statusText}`);
+                    return response;
+                })
+                .catch(error => {
+                    addDebugLog(`Fetch error for ${args[0]}: ${error.message}`, 'error');
+                    throw error;
+                });
+        };
+
+        // DOM Elements
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        const chatMessages = document.getElementById('chatMessages');
+        const messageForm = document.getElementById('messageForm');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const newChatBtn = document.getElementById('newChatBtn');
+        const menuToggle = document.getElementById('menuToggle');
+        const chatSidebar = document.getElementById('chatSidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const loadingModal = document.getElementById('loadingModal');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const debugInfo = document.getElementById('debugInfo');
+        
+        // State
+        let isTyping = false;
+        let messageCount = 0;
+        let isInitialized = false;
+        let retryCount = 0;
+        const MAX_RETRIES = 30;
+        
+        addDebugLog('Page loaded');
+        addDebugLog(`User agent: ${navigator.userAgent}`);
+        
+        // Theme Management
+        const savedTheme = localStorage.getItem('mediguide-theme') || 'light';
+        if (savedTheme === 'dark') {
+            body.classList.remove('light-theme');
+            body.classList.add('dark-theme');
+        }
+        addDebugLog(`Theme: ${savedTheme}`);
+        
+        themeToggle.addEventListener('click', function() {
+            if (body.classList.contains('light-theme')) {
+                body.classList.remove('light-theme');
+                body.classList.add('dark-theme');
+                localStorage.setItem('mediguide-theme', 'dark');
+                addDebugLog('Theme changed to dark');
+            } else {
+                body.classList.remove('dark-theme');
+                body.classList.add('light-theme');
+                localStorage.setItem('mediguide-theme', 'light');
+                addDebugLog('Theme changed to light');
+            }
+        });
+        
+        // Check health endpoint
+        async function checkHealth() {
+            try {
+                addDebugLog(`Health check attempt ${retryCount + 1}/${MAX_RETRIES}`);
+                
+                const response = await fetch('/health');
+                const data = await response.json();
+                
+                addDebugLog(`Health response: ${JSON.stringify(data)}`);
+                
+                if (data.status === 'healthy' && data.initialized) {
+                    isInitialized = true;
+                    statusDot.style.background = '#22C55E';
+                    statusText.textContent = 'Online';
+                    userInput.disabled = false;
+                    sendBtn.disabled = false;
+                    document.querySelectorAll('.input-action').forEach(btn => btn.disabled = false);
+                    loadingModal.style.display = 'none';
                     
-                    console.log('Health check:', data);
+                    addDebugLog('✅ System ready!');
                     
-                    if (data.status === 'healthy' && data.initialized) {
-                        isInitialized = true;
-                        statusDot.style.background = '#22C55E';
-                        statusText.textContent = 'Online';
-                        userInput.disabled = false;
-                        sendBtn.disabled = false;
-                        document.querySelectorAll('.input-action').forEach(btn => btn.disabled = false);
-                        loadingModal.style.display = 'none';
-                        
-                        // Add initial message if chat is empty
-                        if (chatMessages.children.length <= 1) {
-                            addBotMessage('Hello! I\'m MediGuide. Ask me about any medical topic — I have 5 medical encyclopedias at my disposal.');
-                        }
-                        
-                        return true;
-                    } else {
-                        statusDot.style.background = '#F59E0B';
-                        statusText.textContent = 'Starting...';
-                        loadingMessage.textContent = `Starting system (${retryCount}/${MAX_RETRIES})...`;
-                        return false;
+                    // Add initial message if chat is empty
+                    if (chatMessages.children.length <= 1) {
+                        addBotMessage('Hello! I\'m MediGuide. Ask me about any medical topic — I have 5 medical encyclopedias at my disposal.');
                     }
-                } catch (error) {
-                    console.error('Health check failed:', error);
-                    statusDot.style.background = '#DC2626';
-                    statusText.textContent = 'Offline';
-                    loadingMessage.textContent = `Connection error (${retryCount}/${MAX_RETRIES})...`;
+                    
+                    return true;
+                } else {
+                    statusDot.style.background = '#F59E0B';
+                    statusText.textContent = 'Starting...';
+                    loadingMessage.textContent = `Starting system (${retryCount}/${MAX_RETRIES})...`;
+                    debugInfo.textContent = `Memory: ${data.memory_mb}MB | Sessions: ${data.active_sessions}`;
                     return false;
                 }
+            } catch (error) {
+                addDebugLog(`Health check failed: ${error.message}`, 'error');
+                statusDot.style.background = '#DC2626';
+                statusText.textContent = 'Offline';
+                loadingMessage.textContent = `Connection error (${retryCount}/${MAX_RETRIES})...`;
+                debugInfo.textContent = `Error: ${error.message}`;
+                return false;
             }
+        }
+        
+        // Poll health endpoint
+        async function pollHealth() {
+            const isReady = await checkHealth();
             
-            // Poll health endpoint
-            async function pollHealth() {
-                const isReady = await checkHealth();
-                
-                if (!isReady && retryCount < MAX_RETRIES) {
-                    retryCount++;
-                    setTimeout(pollHealth, 3000); // Check every 3 seconds
-                } else if (retryCount >= MAX_RETRIES) {
-                    loadingMessage.innerHTML = 'Failed to start. <button onclick="location.reload()">Refresh</button>';
-                    statusText.textContent = 'Error';
-                }
+            if (!isReady && retryCount < MAX_RETRIES) {
+                retryCount++;
+                setTimeout(pollHealth, 3000);
+            } else if (retryCount >= MAX_RETRIES) {
+                loadingMessage.innerHTML = 'Failed to start. <button onclick="location.reload()">Refresh</button>';
+                statusText.textContent = 'Error';
+                addDebugLog('Max retries reached', 'error');
             }
+        }
+        
+        // Start polling after 2 seconds
+        setTimeout(pollHealth, 2000);
+        
+        // Add bot message
+        function addBotMessage(message) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
-            // Start polling after 2 seconds
-            setTimeout(pollHealth, 2000);
+            const messageGroup = document.createElement('div');
+            messageGroup.className = 'message-group';
             
-            // Add bot message function
-            function addBotMessage(message) {
-                const now = new Date();
-                const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                
-                const messageGroup = document.createElement('div');
-                messageGroup.className = 'message-group';
-                
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'message-bot';
-                
-                const avatar = document.createElement('div');
-                avatar.className = 'message-avatar';
-                avatar.innerHTML = '<i class="fas fa-robot"></i>';
-                
-                const contentDiv = document.createElement('div');
-                contentDiv.className = 'message-content';
-                
-                const bubble = document.createElement('div');
-                bubble.className = 'message-bubble';
-                bubble.textContent = message;
-                
-                const meta = document.createElement('div');
-                meta.className = 'message-meta';
-                
-                const timeSpan = document.createElement('span');
-                timeSpan.className = 'message-time';
-                timeSpan.textContent = timeString;
-                
-                meta.appendChild(timeSpan);
-                
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message-bot';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.innerHTML = '<i class="fas fa-robot"></i>';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.textContent = message;
+            
+            const meta = document.createElement('div');
+            meta.className = 'message-meta';
+            
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'message-time';
+            timeSpan.textContent = timeString;
+            
+            meta.appendChild(timeSpan);
+            
+            const sourceBadge = document.createElement('span');
+            sourceBadge.className = 'source-badge';
+            sourceBadge.innerHTML = '<i class="fas fa-database"></i> Medical DB';
+            meta.appendChild(sourceBadge);
+            
+            contentDiv.appendChild(bubble);
+            contentDiv.appendChild(meta);
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(contentDiv);
+            messageGroup.appendChild(messageDiv);
+            
+            chatMessages.appendChild(messageGroup);
+            scrollToBottom();
+            
+            addDebugLog('Bot message added');
+        }
+        
+        // Auto-resize Textarea
+        function autoResize() {
+            userInput.style.height = 'auto';
+            userInput.style.height = Math.min(userInput.scrollHeight, 100) + 'px';
+        }
+        
+        userInput.addEventListener('input', autoResize);
+        
+        // Scroll to Bottom
+        function scrollToBottom(smooth = true) {
+            chatMessages.scrollTo({
+                top: chatMessages.scrollHeight,
+                behavior: smooth ? 'smooth' : 'auto'
+            });
+        }
+        
+        // Add Message
+        function addMessage(message, isUser = false) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            const messageGroup = document.createElement('div');
+            messageGroup.className = 'message-group';
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = isUser ? 'message-user' : 'message-bot';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.innerHTML = isUser ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.textContent = message;
+            
+            const meta = document.createElement('div');
+            meta.className = 'message-meta';
+            
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'message-time';
+            timeSpan.textContent = timeString;
+            
+            meta.appendChild(timeSpan);
+            
+            if (!isUser) {
                 const sourceBadge = document.createElement('span');
                 sourceBadge.className = 'source-badge';
                 sourceBadge.innerHTML = '<i class="fas fa-database"></i> Medical DB';
                 meta.appendChild(sourceBadge);
-                
-                contentDiv.appendChild(bubble);
-                contentDiv.appendChild(meta);
-                
+            }
+            
+            contentDiv.appendChild(bubble);
+            contentDiv.appendChild(meta);
+            
+            if (isUser) {
+                messageDiv.appendChild(contentDiv);
+                messageDiv.appendChild(avatar);
+            } else {
                 messageDiv.appendChild(avatar);
                 messageDiv.appendChild(contentDiv);
-                messageGroup.appendChild(messageDiv);
-                
-                chatMessages.appendChild(messageGroup);
-                scrollToBottom();
             }
             
-            // Auto-resize Textarea
-            function autoResize() {
-                userInput.style.height = 'auto';
-                userInput.style.height = Math.min(userInput.scrollHeight, 100) + 'px';
-            }
+            messageGroup.appendChild(messageDiv);
+            chatMessages.appendChild(messageGroup);
             
-            userInput.addEventListener('input', autoResize);
+            scrollToBottom();
+            messageCount++;
             
-            // Scroll to Bottom
-            function scrollToBottom(smooth = true) {
-                chatMessages.scrollTo({
-                    top: chatMessages.scrollHeight,
-                    behavior: smooth ? 'smooth' : 'auto'
-                });
-            }
-            
-            // Add Message
-            function addMessage(message, isUser = false) {
-                const now = new Date();
-                const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                
-                const messageGroup = document.createElement('div');
-                messageGroup.className = 'message-group';
-                
-                const messageDiv = document.createElement('div');
-                messageDiv.className = isUser ? 'message-user' : 'message-bot';
-                
-                const avatar = document.createElement('div');
-                avatar.className = 'message-avatar';
-                avatar.innerHTML = isUser ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
-                
-                const contentDiv = document.createElement('div');
-                contentDiv.className = 'message-content';
-                
-                const bubble = document.createElement('div');
-                bubble.className = 'message-bubble';
-                bubble.textContent = message;
-                
-                const meta = document.createElement('div');
-                meta.className = 'message-meta';
-                
-                const timeSpan = document.createElement('span');
-                timeSpan.className = 'message-time';
-                timeSpan.textContent = timeString;
-                
-                meta.appendChild(timeSpan);
-                
-                if (!isUser) {
-                    const sourceBadge = document.createElement('span');
-                    sourceBadge.className = 'source-badge';
-                    sourceBadge.innerHTML = '<i class="fas fa-database"></i> Medical DB';
-                    meta.appendChild(sourceBadge);
-                }
-                
-                contentDiv.appendChild(bubble);
-                contentDiv.appendChild(meta);
-                
-                if (isUser) {
-                    messageDiv.appendChild(contentDiv);
-                    messageDiv.appendChild(avatar);
-                } else {
-                    messageDiv.appendChild(avatar);
-                    messageDiv.appendChild(contentDiv);
-                }
-                
-                messageGroup.appendChild(messageDiv);
-                chatMessages.appendChild(messageGroup);
-                
-                scrollToBottom();
-                messageCount++;
-                
-                // Hide welcome section after first message
-                if (messageCount === 1 && isUser) {
-                    const welcomeSection = document.querySelector('.welcome-section');
-                    if (welcomeSection) {
-                        welcomeSection.style.display = 'none';
-                    }
-                }
-            }
-            
-            // Typing Indicator
-            function showTypingIndicator() {
-                if (isTyping) return;
-                isTyping = true;
-                
-                const typingGroup = document.createElement('div');
-                typingGroup.className = 'message-group';
-                typingGroup.id = 'typingIndicator';
-                
-                const typingDiv = document.createElement('div');
-                typingDiv.className = 'message-bot';
-                
-                const avatar = document.createElement('div');
-                avatar.className = 'message-avatar';
-                avatar.innerHTML = '<i class="fas fa-robot"></i>';
-                
-                const indicator = document.createElement('div');
-                indicator.className = 'typing-indicator';
-                indicator.innerHTML = `
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                `;
-                
-                typingDiv.appendChild(avatar);
-                typingDiv.appendChild(indicator);
-                typingGroup.appendChild(typingDiv);
-                
-                chatMessages.appendChild(typingGroup);
-                scrollToBottom();
-            }
-            
-            function removeTypingIndicator() {
-                const indicator = document.getElementById('typingIndicator');
-                if (indicator) {
-                    indicator.remove();
-                }
-                isTyping = false;
-            }
-            
-            // Send Message
-            async function sendMessage(message) {
-                if (!isInitialized) {
-                    alert('System is still starting up. Please wait...');
-                    return;
-                }
-                
-                try {
-                    showTypingIndicator();
-                    
-                    const response = await fetch('/get', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                        body: new URLSearchParams({ 'msg': message })
-                    });
-                    
-                    if (response.status === 503) {
-                        removeTypingIndicator();
-                        alert('System is still loading. Please wait...');
-                        return;
-                    }
-                    
-                    if (!response.ok) throw new Error('Network error');
-                    
-                    const data = await response.text();
-                    removeTypingIndicator();
-                    addMessage(data, false);
-                    
-                } catch (error) {
-                    console.error('Error:', error);
-                    removeTypingIndicator();
-                    addMessage('Connection issue. Please try again.', false);
-                }
-            }
-            
-            // Form Submit
-            messageForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                if (!isInitialized) {
-                    alert('System is starting up. Please wait...');
-                    return;
-                }
-                
-                const message = userInput.value.trim();
-                if (!message || isTyping) return;
-                
-                addMessage(message, true);
-                
-                userInput.value = '';
-                autoResize();
-                
-                await sendMessage(message);
-            });
-            
-            // Quick Queries
-            document.querySelectorAll('.query-chip').forEach(chip => {
-                chip.addEventListener('click', function() {
-                    if (!isInitialized) {
-                        alert('System is starting up. Please wait...');
-                        return;
-                    }
-                    
-                    const query = this.getAttribute('data-query') || this.textContent.trim();
-                    userInput.value = query;
-                    autoResize();
-                    messageForm.dispatchEvent(new Event('submit'));
-                    
-                    // Close sidebar on mobile after selection
-                    if (window.innerWidth <= 768) {
-                        chatSidebar.classList.remove('show');
-                        sidebarOverlay.classList.remove('show');
-                    }
-                });
-            });
-            
-            // Encyclopedia Items
-            document.querySelectorAll('.encyclopedia-item').forEach(item => {
-                item.addEventListener('click', function() {
-                    if (!isInitialized) {
-                        alert('System is starting up. Please wait...');
-                        return;
-                    }
-                    
-                    const title = this.querySelector('h4').textContent;
-                    userInput.value = `Tell me about ${title}`;
-                    autoResize();
-                    messageForm.dispatchEvent(new Event('submit'));
-                    
-                    // Close sidebar on mobile
-                    if (window.innerWidth <= 768) {
-                        chatSidebar.classList.remove('show');
-                        sidebarOverlay.classList.remove('show');
-                    }
-                });
-            });
-            
-            // Mobile Menu Toggle
-            menuToggle.addEventListener('click', function() {
-                chatSidebar.classList.add('show');
-                sidebarOverlay.classList.add('show');
-            });
-            
-            sidebarOverlay.addEventListener('click', function() {
-                chatSidebar.classList.remove('show');
-                sidebarOverlay.classList.remove('show');
-            });
-            
-            // New Chat Button
-            newChatBtn.addEventListener('click', function() {
-                if (!isInitialized) {
-                    alert('System is starting up. Please wait...');
-                    return;
-                }
-                
-                const messageGroups = document.querySelectorAll('.message-group');
-                messageGroups.forEach(group => {
-                    if (!group.querySelector('.welcome-section')) {
-                        group.remove();
-                    }
-                });
-                
+            // Hide welcome section after first message
+            if (messageCount === 1 && isUser) {
                 const welcomeSection = document.querySelector('.welcome-section');
                 if (welcomeSection) {
-                    welcomeSection.style.display = 'block';
+                    welcomeSection.style.display = 'none';
+                }
+            }
+            
+            addDebugLog(`${isUser ? 'User' : 'Bot'} message added`);
+        }
+        
+        // Typing Indicator
+        function showTypingIndicator() {
+            if (isTyping) return;
+            isTyping = true;
+            
+            const typingGroup = document.createElement('div');
+            typingGroup.className = 'message-group';
+            typingGroup.id = 'typingIndicator';
+            
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message-bot';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.innerHTML = '<i class="fas fa-robot"></i>';
+            
+            const indicator = document.createElement('div');
+            indicator.className = 'typing-indicator';
+            indicator.innerHTML = `
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            `;
+            
+            typingDiv.appendChild(avatar);
+            typingDiv.appendChild(indicator);
+            typingGroup.appendChild(typingDiv);
+            
+            chatMessages.appendChild(typingGroup);
+            scrollToBottom();
+            
+            addDebugLog('Typing indicator shown');
+        }
+        
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) {
+                indicator.remove();
+                addDebugLog('Typing indicator removed');
+            }
+            isTyping = false;
+        }
+        
+        // Send Message
+        async function sendMessage(message) {
+            if (!isInitialized) {
+                addDebugLog('Message blocked - system not initialized', 'warning');
+                alert('System is still starting up. Please wait...');
+                return;
+            }
+            
+            addDebugLog(`Sending message: ${message.substring(0, 30)}...`);
+            
+            try {
+                showTypingIndicator();
+                
+                const response = await fetch('/get', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({ 'msg': message })
+                });
+                
+                addDebugLog(`Response status: ${response.status}`);
+                
+                if (response.status === 503) {
+                    removeTypingIndicator();
+                    addDebugLog('Service unavailable (503)', 'warning');
+                    alert('System is still loading. Please wait...');
+                    return;
                 }
                 
-                messageCount = 0;
-                scrollToBottom();
-            });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.text();
+                addDebugLog(`Response received: ${data.substring(0, 30)}...`);
+                
+                removeTypingIndicator();
+                addMessage(data, false);
+                
+            } catch (error) {
+                addDebugLog(`Send error: ${error.message}`, 'error');
+                removeTypingIndicator();
+                addMessage('Connection issue. Please try again.', false);
+            }
+        }
+        
+        // Form Submit
+        messageForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
             
-            // Enter key
-            userInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey && isInitialized) {
-                    e.preventDefault();
-                    messageForm.dispatchEvent(new Event('submit'));
+            if (!isInitialized) {
+                alert('System is starting up. Please wait...');
+                return;
+            }
+            
+            const message = userInput.value.trim();
+            if (!message || isTyping) return;
+            
+            addMessage(message, true);
+            
+            userInput.value = '';
+            autoResize();
+            
+            await sendMessage(message);
+        });
+        
+        // Quick Queries
+        document.querySelectorAll('.query-chip').forEach(chip => {
+            chip.addEventListener('click', function() {
+                if (!isInitialized) {
+                    alert('System is starting up. Please wait...');
+                    return;
+                }
+                
+                const query = this.getAttribute('data-query') || this.textContent.trim();
+                addDebugLog(`Quick query: ${query}`);
+                userInput.value = query;
+                autoResize();
+                messageForm.dispatchEvent(new Event('submit'));
+                
+                if (window.innerWidth <= 768) {
+                    chatSidebar.classList.remove('show');
+                    sidebarOverlay.classList.remove('show');
+                }
+            });
+        });
+        
+        // Encyclopedia Items
+        document.querySelectorAll('.encyclopedia-item').forEach(item => {
+            item.addEventListener('click', function() {
+                if (!isInitialized) {
+                    alert('System is starting up. Please wait...');
+                    return;
+                }
+                
+                const title = this.querySelector('h4').textContent;
+                addDebugLog(`Encyclopedia: ${title}`);
+                userInput.value = `Tell me about ${title}`;
+                autoResize();
+                messageForm.dispatchEvent(new Event('submit'));
+                
+                if (window.innerWidth <= 768) {
+                    chatSidebar.classList.remove('show');
+                    sidebarOverlay.classList.remove('show');
+                }
+            });
+        });
+        
+        // Mobile Menu Toggle
+        menuToggle.addEventListener('click', function() {
+            chatSidebar.classList.add('show');
+            sidebarOverlay.classList.add('show');
+            addDebugLog('Sidebar opened');
+        });
+        
+        sidebarOverlay.addEventListener('click', function() {
+            chatSidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('show');
+            addDebugLog('Sidebar closed');
+        });
+        
+        // New Chat Button
+        newChatBtn.addEventListener('click', function() {
+            if (!isInitialized) {
+                alert('System is starting up. Please wait...');
+                return;
+            }
+            
+            addDebugLog('New chat started');
+            
+            const messageGroups = document.querySelectorAll('.message-group');
+            messageGroups.forEach(group => {
+                if (!group.querySelector('.welcome-section')) {
+                    group.remove();
                 }
             });
             
-            // Initial scroll
-            setTimeout(scrollToBottom, 100);
+            const welcomeSection = document.querySelector('.welcome-section');
+            if (welcomeSection) {
+                welcomeSection.style.display = 'block';
+            }
+            
+            messageCount = 0;
+            scrollToBottom();
+        });
+        
+        // Enter key
+        userInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey && isInitialized) {
+                e.preventDefault();
+                messageForm.dispatchEvent(new Event('submit'));
+            }
+        });
+        
+        // Initial scroll
+        setTimeout(scrollToBottom, 100);
+        
+        // Check CSS load
+        window.addEventListener('load', function() {
+            const links = document.getElementsByTagName('link');
+            let cssLoaded = false;
+            for (let link of links) {
+                if (link.rel === 'stylesheet' && link.href.includes('style.css')) {
+                    cssLoaded = true;
+                    addDebugLog(`CSS link found: ${link.href}`);
+                }
+            }
+            addDebugLog(`CSS loaded: ${cssLoaded ? '✅' : '❌'}`);
         });
     </script>
 </body>
