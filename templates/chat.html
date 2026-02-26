@@ -3,23 +3,57 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="shortcut icon" href="mediguide.png" type="image/png">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <link rel="stylesheet" href="../static/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    li
+    <!-- Fix deprecated meta tag -->
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <title>MediGuide · Medical AI</title>
-    <link rel="stylesheet" href="../static/styles.css">
+    
     <!-- IBM Plex Sans Font -->
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-   
-    <!-- Custom CSS -->
+    
+    <!-- FIXED: Correct static file path -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <style>
+        /* Fallback styles in case CSS fails to load */
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--bg-main, #ffffff);
+        }
+        .booting-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #000000;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body class="light-theme">
     <!-- Theme Toggle -->
@@ -148,8 +182,8 @@
                         <div class="assistant-details">
                             <h2>MediGuide AI</h2>
                             <p>
-                                <span class="status-dot"></span>
-                                Online · Medical Assistant
+                                <span class="status-dot" id="statusDot"></span>
+                                <span id="statusText">Starting up...</span>
                             </p>
                         </div>
                     </div>
@@ -205,26 +239,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Initial Bot Message -->
-                    <div class="message-group" id="initialMessage">
-                        <div class="message-bot">
-                            <div class="message-avatar">
-                                <i class="fas fa-robot"></i>
-                            </div>
-                            <div class="message-content">
-                                <div class="message-bubble">
-                                    Hello! I'm MediGuide. Ask me about any medical topic — I have 5 medical encyclopedias at my disposal.
-                                </div>
-                                <div class="message-meta">
-                                    <span class="message-time" id="currentTime"></span>
-                                    <span class="source-badge">
-                                        <i class="fas fa-database"></i> Verified
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Input Section -->
@@ -232,10 +246,10 @@
                     <form id="messageForm" class="input-container">
                         <div class="chat-input-wrapper">
                             <div class="input-actions">
-                                <button type="button" class="input-action" id="attachBtn" title="Attach">
+                                <button type="button" class="input-action" id="attachBtn" title="Attach" disabled>
                                     <i class="fas fa-paperclip"></i>
                                 </button>
-                                <button type="button" class="input-action" id="voiceBtn" title="Voice">
+                                <button type="button" class="input-action" id="voiceBtn" title="Voice" disabled>
                                     <i class="fas fa-microphone"></i>
                                 </button>
                             </div>
@@ -245,8 +259,9 @@
                                 placeholder="Ask about symptoms, conditions..." 
                                 rows="1"
                                 aria-label="Message"
+                                disabled
                             ></textarea>
-                            <button type="submit" class="send-button" id="sendBtn" title="Send">
+                            <button type="submit" class="send-button" id="sendBtn" title="Send" disabled>
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                         </div>
@@ -256,6 +271,15 @@
                     </form>
                 </footer>
             </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap Modal for Loading -->
+    <div id="loadingModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 30px; border-radius: 10px; text-align: center; max-width: 300px;">
+            <div class="loader" style="margin: 0 auto 20px;"></div>
+            <h3>Starting MediGuide...</h3>
+            <p id="loadingMessage">Loading AI model (30-60 seconds)</p>
         </div>
     </div>
 
@@ -272,13 +296,22 @@
             const menuToggle = document.getElementById('menuToggle');
             const chatSidebar = document.getElementById('chatSidebar');
             const sidebarOverlay = document.getElementById('sidebarOverlay');
-            const currentTimeSpan = document.getElementById('currentTime');
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const loadingModal = document.getElementById('loadingModal');
+            const loadingMessage = document.getElementById('loadingMessage');
             
             // State
             let isTyping = false;
             let messageCount = 0;
+            let isInitialized = false;
+            let retryCount = 0;
+            const MAX_RETRIES = 10;
             
-            // Theme Management - Default to light
+            // Show loading modal
+            loadingModal.style.display = 'flex';
+            
+            // Theme Management
             const savedTheme = localStorage.getItem('mediguide-theme') || 'light';
             if (savedTheme === 'dark') {
                 body.classList.remove('light-theme');
@@ -297,16 +330,103 @@
                 }
             });
             
-            // Update Time
-            function updateTime() {
-                const now = new Date();
-                const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                if (currentTimeSpan) {
-                    currentTimeSpan.textContent = timeString;
+            // Check health endpoint
+            async function checkHealth() {
+                try {
+                    const response = await fetch('/health');
+                    const data = await response.json();
+                    
+                    if (data.status === 'healthy' && data.initialized) {
+                        isInitialized = true;
+                        statusDot.style.background = '#22C55E';
+                        statusText.textContent = 'Online';
+                        userInput.disabled = false;
+                        sendBtn.disabled = false;
+                        document.querySelectorAll('.input-action').forEach(btn => btn.disabled = false);
+                        loadingModal.style.display = 'none';
+                        
+                        // Add initial message if chat is empty
+                        if (chatMessages.children.length <= 1) {
+                            addBotMessage('Hello! I\'m MediGuide. Ask me about any medical topic — I have 5 medical encyclopedias at my disposal.');
+                        }
+                        
+                        return true;
+                    } else {
+                        statusDot.style.background = '#F59E0B';
+                        statusText.textContent = 'Starting...';
+                        loadingMessage.textContent = `Loading AI model (${retryCount}/${MAX_RETRIES})...`;
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('Health check failed:', error);
+                    statusDot.style.background = '#DC2626';
+                    statusText.textContent = 'Offline';
+                    return false;
                 }
             }
-            updateTime();
-            setInterval(updateTime, 60000);
+            
+            // Poll health endpoint
+            async function pollHealth() {
+                const isReady = await checkHealth();
+                
+                if (!isReady && retryCount < MAX_RETRIES) {
+                    retryCount++;
+                    setTimeout(pollHealth, 5000); // Check every 5 seconds
+                } else if (retryCount >= MAX_RETRIES) {
+                    loadingMessage.textContent = 'Failed to start. Please refresh.';
+                    statusText.textContent = 'Error';
+                }
+            }
+            
+            // Start polling
+            pollHealth();
+            
+            // Add bot message function
+            function addBotMessage(message) {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                const messageGroup = document.createElement('div');
+                messageGroup.className = 'message-group';
+                
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message-bot';
+                
+                const avatar = document.createElement('div');
+                avatar.className = 'message-avatar';
+                avatar.innerHTML = '<i class="fas fa-robot"></i>';
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+                
+                const bubble = document.createElement('div');
+                bubble.className = 'message-bubble';
+                bubble.textContent = message;
+                
+                const meta = document.createElement('div');
+                meta.className = 'message-meta';
+                
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'message-time';
+                timeSpan.textContent = timeString;
+                
+                meta.appendChild(timeSpan);
+                
+                const sourceBadge = document.createElement('span');
+                sourceBadge.className = 'source-badge';
+                sourceBadge.innerHTML = '<i class="fas fa-database"></i> Medical DB';
+                meta.appendChild(sourceBadge);
+                
+                contentDiv.appendChild(bubble);
+                contentDiv.appendChild(meta);
+                
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(contentDiv);
+                messageGroup.appendChild(messageDiv);
+                
+                chatMessages.appendChild(messageGroup);
+                scrollToBottom();
+            }
             
             // Auto-resize Textarea
             function autoResize() {
@@ -430,6 +550,11 @@
             
             // Send Message
             async function sendMessage(message) {
+                if (!isInitialized) {
+                    alert('System is still starting up. Please wait...');
+                    return;
+                }
+                
                 try {
                     showTypingIndicator();
                     
@@ -440,6 +565,12 @@
                         },
                         body: new URLSearchParams({ 'msg': message })
                     });
+                    
+                    if (response.status === 503) {
+                        removeTypingIndicator();
+                        alert('System is still loading. Please wait...');
+                        return;
+                    }
                     
                     if (!response.ok) throw new Error('Network error');
                     
@@ -458,6 +589,11 @@
             messageForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
+                if (!isInitialized) {
+                    alert('System is starting up. Please wait...');
+                    return;
+                }
+                
                 const message = userInput.value.trim();
                 if (!message || isTyping) return;
                 
@@ -472,6 +608,11 @@
             // Quick Queries
             document.querySelectorAll('.query-chip').forEach(chip => {
                 chip.addEventListener('click', function() {
+                    if (!isInitialized) {
+                        alert('System is starting up. Please wait...');
+                        return;
+                    }
+                    
                     const query = this.getAttribute('data-query') || this.textContent.trim();
                     userInput.value = query;
                     autoResize();
@@ -488,6 +629,11 @@
             // Encyclopedia Items
             document.querySelectorAll('.encyclopedia-item').forEach(item => {
                 item.addEventListener('click', function() {
+                    if (!isInitialized) {
+                        alert('System is starting up. Please wait...');
+                        return;
+                    }
+                    
                     const title = this.querySelector('h4').textContent;
                     userInput.value = `Tell me about ${title}`;
                     autoResize();
@@ -514,9 +660,14 @@
             
             // New Chat Button
             newChatBtn.addEventListener('click', function() {
+                if (!isInitialized) {
+                    alert('System is starting up. Please wait...');
+                    return;
+                }
+                
                 const messageGroups = document.querySelectorAll('.message-group');
                 messageGroups.forEach(group => {
-                    if (group.id !== 'initialMessage') {
+                    if (!group.querySelector('.welcome-section')) {
                         group.remove();
                     }
                 });
@@ -532,29 +683,11 @@
             
             // Enter key
             userInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
+                if (e.key === 'Enter' && !e.shiftKey && isInitialized) {
                     e.preventDefault();
                     messageForm.dispatchEvent(new Event('submit'));
                 }
             });
-            
-            // Voice (placeholder)
-            document.getElementById('voiceBtn').addEventListener('click', function() {
-                alert('Voice input coming soon');
-            });
-            
-            // Attach (placeholder)
-            document.getElementById('attachBtn').addEventListener('click', function() {
-                alert('File attachment coming soon');
-            });
-            
-            // History
-            document.getElementById('historyBtn').addEventListener('click', function() {
-                alert('Chat history coming soon');
-            });
-            
-            // Focus input
-            userInput.focus();
             
             // Initial scroll
             setTimeout(scrollToBottom, 100);
