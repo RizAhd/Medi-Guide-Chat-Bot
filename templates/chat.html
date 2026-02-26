@@ -4,10 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../static/styles.css">
+    <link rel="shortcut icon" href="mediguide.png" type="image/png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
-    li
+    
     <!-- Fix deprecated meta tag -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -20,7 +21,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <!-- FIXED: Correct static file path -->
+    <!-- CORRECT static file path - ONLY ONE CSS LINK -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     
     <style>
@@ -274,12 +275,12 @@
         </div>
     </div>
 
-    <!-- Bootstrap Modal for Loading -->
-    <div id="loadingModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <!-- Loading Modal -->
+    <div id="loadingModal" style="display: flex; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
         <div style="background: white; padding: 30px; border-radius: 10px; text-align: center; max-width: 300px;">
             <div class="loader" style="margin: 0 auto 20px;"></div>
             <h3>Starting MediGuide...</h3>
-            <p id="loadingMessage">Loading AI model (30-60 seconds)</p>
+            <p id="loadingMessage">Starting system (0/10)...</p>
         </div>
     </div>
 
@@ -306,10 +307,7 @@
             let messageCount = 0;
             let isInitialized = false;
             let retryCount = 0;
-            const MAX_RETRIES = 10;
-            
-            // Show loading modal
-            loadingModal.style.display = 'flex';
+            const MAX_RETRIES = 20;
             
             // Theme Management
             const savedTheme = localStorage.getItem('mediguide-theme') || 'light';
@@ -336,6 +334,8 @@
                     const response = await fetch('/health');
                     const data = await response.json();
                     
+                    console.log('Health check:', data);
+                    
                     if (data.status === 'healthy' && data.initialized) {
                         isInitialized = true;
                         statusDot.style.background = '#22C55E';
@@ -354,13 +354,14 @@
                     } else {
                         statusDot.style.background = '#F59E0B';
                         statusText.textContent = 'Starting...';
-                        loadingMessage.textContent = `Loading AI model (${retryCount}/${MAX_RETRIES})...`;
+                        loadingMessage.textContent = `Starting system (${retryCount}/${MAX_RETRIES})...`;
                         return false;
                     }
                 } catch (error) {
                     console.error('Health check failed:', error);
                     statusDot.style.background = '#DC2626';
                     statusText.textContent = 'Offline';
+                    loadingMessage.textContent = `Connection error (${retryCount}/${MAX_RETRIES})...`;
                     return false;
                 }
             }
@@ -371,15 +372,15 @@
                 
                 if (!isReady && retryCount < MAX_RETRIES) {
                     retryCount++;
-                    setTimeout(pollHealth, 5000); // Check every 5 seconds
+                    setTimeout(pollHealth, 3000); // Check every 3 seconds
                 } else if (retryCount >= MAX_RETRIES) {
-                    loadingMessage.textContent = 'Failed to start. Please refresh.';
+                    loadingMessage.innerHTML = 'Failed to start. <button onclick="location.reload()">Refresh</button>';
                     statusText.textContent = 'Error';
                 }
             }
             
-            // Start polling
-            pollHealth();
+            // Start polling after 2 seconds
+            setTimeout(pollHealth, 2000);
             
             // Add bot message function
             function addBotMessage(message) {

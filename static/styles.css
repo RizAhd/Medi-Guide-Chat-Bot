@@ -1,4 +1,4 @@
-/* style.css - MediGuide AI Monochrome Medical Theme */
+/* static/style.css - MediGuide AI Monochrome Medical Theme */
 :root {
     /* Light Theme (Default) - Pure Black & White */
     --primary: #000000;
@@ -740,12 +740,11 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
     gap: 2px;
     align-items: center;
-    padding-top: 5px;
 }
 
 .input-action {
     width: 36px;
-    height: 46px;
+    height: 36px;
     background: transparent;
     border: none;
     border-radius: var(--radius-full);
@@ -820,7 +819,6 @@ h1, h2, h3, h4, h5, h6 {
     
     /* Hide desktop-only elements */
     .brand-text p,
-    .database-tag,
     .chat-stats {
         display: none;
     }
@@ -944,7 +942,7 @@ h1, h2, h3, h4, h5, h6 {
     
     .input-action {
         width: 32px;
-        height: 48px;
+        height: 32px;
     }
     
     .input-action i {
