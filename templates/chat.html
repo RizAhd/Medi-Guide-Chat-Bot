@@ -1,820 +1,565 @@
-<!-- templates/chat.html - WITH DEBUG CONSOLES -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-    <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <title>MediGuide · Medical AI</title>
-    
+    <title>MediGuide AI · Medical Assistant</title>
+        
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../static/styles.css">
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <!-- CSS - Using url_for -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    
-    <style>
-        /* Debug panel */
-        #debug-panel {
-            position: fixed;
-            bottom: 10px;
-            left: 10px;
-            background: rgba(0,0,0,0.8);
-            color: #0f0;
-            font-family: monospace;
-            font-size: 12px;
-            padding: 10px;
-            border-radius: 5px;
-            z-index: 10000;
-            max-width: 400px;
-            max-height: 200px;
-            overflow: auto;
-            display: none;
-        }
-        #debug-panel.show {
-            display: block;
-        }
-        .debug-log {
-            border-bottom: 1px solid #333;
-            padding: 2px 0;
-        }
-        .debug-toggle {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background: #000;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            padding: 5px 10px;
-            font-size: 12px;
-            cursor: pointer;
-            z-index: 10001;
-        }
-    </style>
+
 </head>
 <body class="light-theme">
-    <!-- Debug Toggle Button -->
-    <button class="debug-toggle" id="debugToggle">🐛 Debug</button>
-    
-    <!-- Debug Panel -->
-    <div id="debug-panel">
-        <div style="font-weight: bold; margin-bottom: 5px;">🔍 Debug Console</div>
-        <div id="debug-logs"></div>
+    <!-- Theme Toggle - Fixed Position -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <i class="fas fa-sun"></i>
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <!-- Mobile Prompts Drawer -->
+    <div class="prompts-drawer" id="promptsDrawer">
+        <div class="drawer-header">
+            <h3>Medical Knowledge</h3>
+            <button class="drawer-close" id="closeDrawer">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="drawer-content">
+            <!-- Knowledge Panel (will be populated via JS) -->
+        </div>
     </div>
+    <div class="drawer-overlay" id="drawerOverlay"></div>
 
-    <!-- Theme Toggle -->
-    <div class="theme-toggle-container">
-        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-            <i class="fas fa-moon"></i>
-            <i class="fas fa-sun"></i>
-        </button>
-    </div>
-
-    <!-- Sidebar Overlay (Mobile) -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-    <!-- Main App Container -->
-    <div class="app-container">
-        <!-- Top Bar -->
-        <header class="top-bar">
-            <div class="brand-section">
-                <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+    <!-- Main Container -->
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <button class="icon-button menu-button" id="menuButton">
                     <i class="fas fa-bars"></i>
                 </button>
-                <div class="brand-logo">
+                <div class="logo">
                     <i class="fas fa-stethoscope"></i>
-                </div>
-                <div class="brand-text">
-                    <h1 class="app-title">MediGuide</h1>
-                    <p>Medical AI · 5 Encyclopedias</p>
+                    <span>MediGuide AI</span>
                 </div>
             </div>
-            <div class="top-actions">
-                <button class="action-btn" id="newChatBtn" title="New chat">
+            <div class="header-right">
+                <button class="icon-button" id="newChatBtn">
                     <i class="fas fa-plus"></i>
                 </button>
-                <button class="action-btn" id="historyBtn" title="History">
-                    <i class="fas fa-history"></i>
+                <button class="icon-button" id="settingsBtn">
+                    <i class="fas fa-cog"></i>
                 </button>
             </div>
         </header>
 
-        <!-- Main Chat Interface -->
-        <div class="chat-interface">
-            <!-- Sidebar -->
-            <aside class="chat-sidebar" id="chatSidebar">
+        <!-- Main Content -->
+        <div class="main">
+            <!-- Desktop Sidebar (hidden on mobile) -->
+            <aside class="sidebar desktop-only" id="desktopSidebar">
                 <div class="knowledge-panel">
                     <div class="panel-header">
-                        <div class="panel-icon">
-                            <i class="fas fa-database"></i>
-                        </div>
-                        <div class="panel-title">
+                        <i class="fas fa-database"></i>
+                        <div>
                             <h3>Knowledge Base</h3>
                             <p>5 Medical Encyclopedias</p>
                         </div>
                     </div>
                     
-                    <div class="encyclopedia-grid">
-                        <div class="encyclopedia-item" data-source="gale-medicine">
-                            <div class="encyclopedia-icon"><i class="fas fa-book-medical"></i></div>
-                            <div class="encyclopedia-info">
-                                <h4>Gale Medicine</h4>
-                                <p>Diseases & Treatments</p>
-                            </div>
-                        </div>
-                        <div class="encyclopedia-item" data-source="mental-health">
-                            <div class="encyclopedia-icon"><i class="fas fa-brain"></i></div>
-                            <div class="encyclopedia-info">
-                                <h4>Mental Health</h4>
-                                <p>Psychology & Therapy</p>
-                            </div>
-                        </div>
-                        <div class="encyclopedia-item" data-source="nursing">
-                            <div class="encyclopedia-icon"><i class="fas fa-user-nurse"></i></div>
-                            <div class="encyclopedia-info">
-                                <h4>Nursing & Allied</h4>
-                                <p>Patient Care</p>
-                            </div>
-                        </div>
-                        <div class="encyclopedia-item" data-source="pediatrics">
-                            <div class="encyclopedia-icon"><i class="fas fa-baby"></i></div>
-                            <div class="encyclopedia-info">
-                                <h4>Children's Health</h4>
-                                <p>Pediatrics</p>
-                            </div>
-                        </div>
-                        <div class="encyclopedia-item" data-source="nutrition">
-                            <div class="encyclopedia-icon"><i class="fas fa-apple-alt"></i></div>
-                            <div class="encyclopedia-info">
-                                <h4>Nutrition</h4>
-                                <p>Diet & Wellness</p>
-                            </div>
+                    <div class="categories">
+                        <h4>Categories</h4>
+                        <div class="category-list">
+                            <button class="category-item" data-prompt="Tell me about Gale Encyclopedia of Medicine">
+                                <i class="fas fa-book-medical"></i>
+                                <div>
+                                    <strong>Gale Medicine</strong>
+                                    <span>Diseases & Treatments</span>
+                                </div>
+                            </button>
+                            <button class="category-item" data-prompt="Tell me about mental health conditions">
+                                <i class="fas fa-brain"></i>
+                                <div>
+                                    <strong>Mental Health</strong>
+                                    <span>Psychology & Therapy</span>
+                                </div>
+                            </button>
+                            <button class="category-item" data-prompt="Tell me about nursing procedures">
+                                <i class="fas fa-user-nurse"></i>
+                                <div>
+                                    <strong>Nursing & Allied</strong>
+                                    <span>Patient Care</span>
+                                </div>
+                            </button>
+                            <button class="category-item" data-prompt="Tell me about children's health">
+                                <i class="fas fa-baby"></i>
+                                <div>
+                                    <strong>Children's Health</strong>
+                                    <span>Pediatrics</span>
+                                </div>
+                            </button>
+                            <button class="category-item" data-prompt="Tell me about nutrition and diet">
+                                <i class="fas fa-apple-alt"></i>
+                                <div>
+                                    <strong>Diets & Nutrition</strong>
+                                    <span>Wellness</span>
+                                </div>
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Quick Queries -->
-                    <div class="quick-queries">
+                    <div class="quick-prompts">
                         <h4>Quick Questions</h4>
-                        <div class="queries-grid">
-                            <button class="query-chip" data-query="Diabetes symptoms?">Diabetes</button>
-                            <button class="query-chip" data-query="Anxiety treatment?">Anxiety</button>
-                            <button class="query-chip" data-query="Vaccine schedule?">Vaccines</button>
-                            <button class="query-chip" data-query="Heart diet?">Heart Health</button>
-                            <button class="query-chip" data-query="COVID symptoms?">COVID-19</button>
-                            <button class="query-chip" data-query="Blood pressure?">BP</button>
+                        <div class="prompt-grid">
+                            <button class="prompt-chip" data-prompt="What are symptoms of diabetes?">
+                                <i class="fas fa-droplet"></i> Diabetes
+                            </button>
+                            <button class="prompt-chip" data-prompt="How to treat anxiety?">
+                                <i class="fas fa-heart"></i> Anxiety
+                            </button>
+                            <button class="prompt-chip" data-prompt="Child vaccination schedule?">
+                                <i class="fas fa-syringe"></i> Vaccines
+                            </button>
+                            <button class="prompt-chip" data-prompt="Heart healthy foods?">
+                                <i class="fas fa-heart-pulse"></i> Heart Health
+                            </button>
+                            <button class="prompt-chip" data-prompt="Lower blood pressure naturally?">
+                                <i class="fas fa-heart-circle-bolt"></i> BP
+                            </button>
+                            <button class="prompt-chip" data-prompt="Common cold remedies?">
+                                <i class="fas fa-temperature-high"></i> Cold
+                            </button>
                         </div>
+                    </div>
+
+                    <div class="disclaimer">
+                        <i class="fas fa-info-circle"></i>
+                        <span>For informational purposes only</span>
                     </div>
                 </div>
             </aside>
 
-            <!-- Main Chat Area -->
-            <main class="chat-main">
+            <!-- Chat Area -->
+            <main class="chat-area">
                 <!-- Chat Header -->
                 <div class="chat-header">
-                    <div class="assistant-info">
+                    <div class="assistant">
                         <div class="assistant-avatar">
                             <i class="fas fa-robot"></i>
+                            <span class="status"></span>
                         </div>
-                        <div class="assistant-details">
+                        <div>
                             <h2>MediGuide AI</h2>
-                            <p>
-                                <span class="status-dot" id="statusDot"></span>
-                                <span id="statusText">Starting up...</span>
-                            </p>
+                            <p><span class="dot"></span> Online · Medical Assistant</p>
                         </div>
                     </div>
-                    <div class="chat-stats">
-                        <div class="stat-item">
-                            <div class="stat-value">5</div>
-                            <div class="stat-label">Sources</div>
+                    <div class="chat-stats desktop-only">
+                        <div>5 Sources</div>
+                        <div>24/7 Available</div>
+                    </div>
+                </div>
+
+                <!-- Messages Container -->
+                <div class="messages" id="messages">
+                    <!-- Welcome Message -->
+                    <div class="message welcome">
+                        <div class="avatar">
+                            <i class="fas fa-robot"></i>
                         </div>
-                        <div class="stat-item">
-                            <div class="stat-value">24/7</div>
-                            <div class="stat-label">Support</div>
+                        <div class="bubble-container">
+                            <div class="bubble bot">
+                                👋 Hi, I'm MediGuide AI. I can help with medical questions using 5 encyclopedias.
+                            </div>
+                            <span class="time">Just now</span>
+                        </div>
+                    </div>
+
+                    <!-- Quick Suggestions -->
+                    <div class="suggestions">
+                        <p class="suggestions-label">Try asking:</p>
+                        <div class="suggestions-list">
+                            <button class="suggestion" data-prompt="Early signs of diabetes?">
+                                <i class="fas fa-droplet"></i> Diabetes signs
+                            </button>
+                            <button class="suggestion" data-prompt="Anxiety relief techniques?">
+                                <i class="fas fa-heart"></i> Anxiety relief
+                            </button>
+                            <button class="suggestion" data-prompt="Child fever treatment?">
+                                <i class="fas fa-baby"></i> Child fever
+                            </button>
+                            <button class="suggestion" data-prompt="Best diet for high BP?">
+                                <i class="fas fa-heart-pulse"></i> BP diet
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Chat Messages Container -->
-                <div class="chat-messages" id="chatMessages">
-                    <!-- Welcome Section -->
-                    <div class="welcome-section">
-                        <div class="welcome-content">
-                            <h1>Welcome to MediGuide</h1>
-                            <p>Your medical AI assistant. Ask about symptoms, conditions, treatments, or general health.</p>
-                        </div>
-                        
-                        <div class="ai-features">
-                            <div class="feature">
-                                <div class="feature-icon"><i class="fas fa-robot"></i></div>
-                                <h4>AI-Powered</h4>
-                                <p>Medical intelligence</p>
-                            </div>
-                            <div class="feature">
-                                <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
-                                <h4>Private</h4>
-                                <p>Secure & encrypted</p>
-                            </div>
-                            <div class="feature">
-                                <div class="feature-icon"><i class="fas fa-bolt"></i></div>
-                                <h4>Instant</h4>
-                                <p>Real-time answers</p>
-                            </div>
-                            <div class="feature">
-                                <div class="feature-icon"><i class="fas fa-graduation-cap"></i></div>
-                                <h4>Educational</h4>
-                                <p>Evidence-based</p>
-                            </div>
-                        </div>
+                <!-- Typing Indicator -->
+                <div class="typing" id="typingIndicator">
+                    <div class="avatar small">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
                     </div>
                 </div>
 
-                <!-- Input Section -->
-                <footer class="input-section">
-                    <form id="messageForm" class="input-container">
-                        <div class="chat-input-wrapper">
-                            <div class="input-actions">
-                                <button type="button" class="input-action" id="attachBtn" title="Attach" disabled>
-                                    <i class="fas fa-paperclip"></i>
-                                </button>
-                                <button type="button" class="input-action" id="voiceBtn" title="Voice" disabled>
-                                    <i class="fas fa-microphone"></i>
-                                </button>
-                            </div>
+                <!-- Input Area -->
+                <div class="input-area">
+                    <form id="messageForm">
+                        <div class="input-wrapper">
                             <textarea 
-                                id="userInput" 
-                                class="chat-input" 
-                                placeholder="Ask about symptoms, conditions..." 
+                                id="userInput"
+                                class="input-field"
+                                placeholder="Ask about symptoms, conditions..."
                                 rows="1"
-                                aria-label="Message"
-                                disabled
                             ></textarea>
-                            <button type="submit" class="send-button" id="sendBtn" title="Send" disabled>
+                            <button type="submit" class="send-button" id="sendBtn">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                         </div>
-                        <p class="disclaimer-text">
-                            For informational purposes only. Not medical advice.
-                        </p>
                     </form>
-                </footer>
+                </div>
             </main>
         </div>
     </div>
 
-    <!-- Loading Modal -->
-    <div id="loadingModal" style="display: flex; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
-        <div style="background: white; padding: 30px; border-radius: 10px; text-align: center; max-width: 300px;">
-            <div class="loader" style="margin: 0 auto 20px;"></div>
-            <h3>Starting MediGuide...</h3>
-            <p id="loadingMessage">Starting system (0/20)...</p>
-            <p style="font-size: 11px; color: #666; margin-top: 10px;" id="debugInfo"></p>
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Settings</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-item">
+                    <span>Theme</span>
+                    <div class="theme-selector">
+                        <button class="theme-option active" data-theme="light">Light</button>
+                        <button class="theme-option" data-theme="dark">Dark</button>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <span>Send with Enter</span>
+                    <label class="switch">
+                        <input type="checkbox" id="enterToSend" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Debug console
-        const debugPanel = document.getElementById('debug-panel');
-        const debugLogs = document.getElementById('debug-logs');
-        const debugToggle = document.getElementById('debugToggle');
-        let debugEnabled = false;
-
-        function addDebugLog(message, type = 'info') {
-            if (!debugEnabled) return;
+        document.addEventListener('DOMContentLoaded', function() {
+            // ========== DOM Elements ==========
+            const body = document.body;
+            const themeToggle = document.getElementById('themeToggle');
+            const menuButton = document.getElementById('menuButton');
+            const drawer = document.getElementById('promptsDrawer');
+            const overlay = document.getElementById('drawerOverlay');
+            const closeDrawer = document.getElementById('closeDrawer');
+            const messages = document.getElementById('messages');
+            const messageForm = document.getElementById('messageForm');
+            const userInput = document.getElementById('userInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const newChatBtn = document.getElementById('newChatBtn');
+            const typingIndicator = document.getElementById('typingIndicator');
+            const settingsBtn = document.getElementById('settingsBtn');
+            const settingsModal = document.getElementById('settingsModal');
             
-            const logEntry = document.createElement('div');
-            logEntry.className = 'debug-log';
-            const timestamp = new Date().toLocaleTimeString();
-            logEntry.innerHTML = `[${timestamp}] ${type.toUpperCase()}: ${message}`;
-            debugLogs.appendChild(logEntry);
-            debugPanel.scrollTop = debugPanel.scrollHeight;
-            
-            // Also log to browser console
-            console.log(`[DEBUG] ${message}`);
-        }
+            // ========== Theme Management ==========
+            const savedTheme = localStorage.getItem('mediguide-theme') || 'light';
+            body.className = savedTheme + '-theme';
+            updateThemeIcon(savedTheme);
 
-        debugToggle.addEventListener('click', () => {
-            debugEnabled = !debugEnabled;
-            debugPanel.classList.toggle('show');
-            debugToggle.textContent = debugEnabled ? '🔍 Hide' : '🐛 Debug';
-            if (debugEnabled) {
-                addDebugLog('Debug mode enabled');
-                checkAllResources();
-            }
-        });
-
-        // Check all resources
-        async function checkAllResources() {
-            addDebugLog('Checking resources...');
-            
-            // Check CSS
-            fetch("{{ url_for('static', filename='style.css') }}", { method: 'HEAD' })
-                .then(response => {
-                    addDebugLog(`CSS file: ${response.ok ? '✅ Found' : '❌ Not found'} (${response.status})`);
-                })
-                .catch(err => {
-                    addDebugLog(`CSS error: ${err.message}`, 'error');
-                });
-            
-            // Check health endpoint
-            fetch('/health')
-                .then(response => response.json())
-                .then(data => {
-                    addDebugLog(`Health endpoint: ✅ OK`);
-                    addDebugLog(`Initialized: ${data.initialized}`);
-                    addDebugLog(`Memory: ${data.memory_mb}MB`);
-                    addDebugLog(`Static files: ${JSON.stringify(data.static_files)}`);
-                })
-                .catch(err => {
-                    addDebugLog(`Health check failed: ${err.message}`, 'error');
-                });
-            
-            // Check debug endpoint
-            fetch('/debug')
-                .then(response => response.json())
-                .then(data => {
-                    addDebugLog(`Debug endpoint: ✅ OK`);
-                    addDebugLog(`Static folder: ${data.static_folder}`);
-                    addDebugLog(`Static exists: ${data.static_exists}`);
-                    addDebugLog(`Static contents: ${data.static_contents.join(', ')}`);
-                })
-                .catch(err => {
-                    addDebugLog(`Debug endpoint failed: ${err.message}`, 'error');
-                });
-        }
-
-        // Override fetch to log all requests
-        const originalFetch = window.fetch;
-        window.fetch = function(...args) {
-            addDebugLog(`Fetching: ${args[0]}`);
-            return originalFetch.apply(this, args)
-                .then(response => {
-                    addDebugLog(`Response from ${args[0]}: ${response.status} ${response.statusText}`);
-                    return response;
-                })
-                .catch(error => {
-                    addDebugLog(`Fetch error for ${args[0]}: ${error.message}`, 'error');
-                    throw error;
-                });
-        };
-
-        // DOM Elements
-        const themeToggle = document.getElementById('themeToggle');
-        const body = document.body;
-        const chatMessages = document.getElementById('chatMessages');
-        const messageForm = document.getElementById('messageForm');
-        const userInput = document.getElementById('userInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const newChatBtn = document.getElementById('newChatBtn');
-        const menuToggle = document.getElementById('menuToggle');
-        const chatSidebar = document.getElementById('chatSidebar');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-        const statusDot = document.getElementById('statusDot');
-        const statusText = document.getElementById('statusText');
-        const loadingModal = document.getElementById('loadingModal');
-        const loadingMessage = document.getElementById('loadingMessage');
-        const debugInfo = document.getElementById('debugInfo');
-        
-        // State
-        let isTyping = false;
-        let messageCount = 0;
-        let isInitialized = false;
-        let retryCount = 0;
-        const MAX_RETRIES = 30;
-        
-        addDebugLog('Page loaded');
-        addDebugLog(`User agent: ${navigator.userAgent}`);
-        
-        // Theme Management
-        const savedTheme = localStorage.getItem('mediguide-theme') || 'light';
-        if (savedTheme === 'dark') {
-            body.classList.remove('light-theme');
-            body.classList.add('dark-theme');
-        }
-        addDebugLog(`Theme: ${savedTheme}`);
-        
-        themeToggle.addEventListener('click', function() {
-            if (body.classList.contains('light-theme')) {
-                body.classList.remove('light-theme');
-                body.classList.add('dark-theme');
-                localStorage.setItem('mediguide-theme', 'dark');
-                addDebugLog('Theme changed to dark');
-            } else {
-                body.classList.remove('dark-theme');
-                body.classList.add('light-theme');
-                localStorage.setItem('mediguide-theme', 'light');
-                addDebugLog('Theme changed to light');
-            }
-        });
-        
-        // Check health endpoint
-        async function checkHealth() {
-            try {
-                addDebugLog(`Health check attempt ${retryCount + 1}/${MAX_RETRIES}`);
-                
-                const response = await fetch('/health');
-                const data = await response.json();
-                
-                addDebugLog(`Health response: ${JSON.stringify(data)}`);
-                
-                if (data.status === 'healthy' && data.initialized) {
-                    isInitialized = true;
-                    statusDot.style.background = '#22C55E';
-                    statusText.textContent = 'Online';
-                    userInput.disabled = false;
-                    sendBtn.disabled = false;
-                    document.querySelectorAll('.input-action').forEach(btn => btn.disabled = false);
-                    loadingModal.style.display = 'none';
-                    
-                    addDebugLog('✅ System ready!');
-                    
-                    // Add initial message if chat is empty
-                    if (chatMessages.children.length <= 1) {
-                        addBotMessage('Hello! I\'m MediGuide. Ask me about any medical topic — I have 5 medical encyclopedias at my disposal.');
-                    }
-                    
-                    return true;
+            function updateThemeIcon(theme) {
+                const sun = themeToggle.querySelector('.fa-sun');
+                const moon = themeToggle.querySelector('.fa-moon');
+                if (theme === 'dark') {
+                    sun.style.display = 'none';
+                    moon.style.display = 'block';
                 } else {
-                    statusDot.style.background = '#F59E0B';
-                    statusText.textContent = 'Starting...';
-                    loadingMessage.textContent = `Starting system (${retryCount}/${MAX_RETRIES})...`;
-                    debugInfo.textContent = `Memory: ${data.memory_mb}MB | Sessions: ${data.active_sessions}`;
-                    return false;
+                    sun.style.display = 'block';
+                    moon.style.display = 'none';
                 }
-            } catch (error) {
-                addDebugLog(`Health check failed: ${error.message}`, 'error');
-                statusDot.style.background = '#DC2626';
-                statusText.textContent = 'Offline';
-                loadingMessage.textContent = `Connection error (${retryCount}/${MAX_RETRIES})...`;
-                debugInfo.textContent = `Error: ${error.message}`;
-                return false;
             }
-        }
-        
-        // Poll health endpoint
-        async function pollHealth() {
-            const isReady = await checkHealth();
-            
-            if (!isReady && retryCount < MAX_RETRIES) {
-                retryCount++;
-                setTimeout(pollHealth, 3000);
-            } else if (retryCount >= MAX_RETRIES) {
-                loadingMessage.innerHTML = 'Failed to start. <button onclick="location.reload()">Refresh</button>';
-                statusText.textContent = 'Error';
-                addDebugLog('Max retries reached', 'error');
-            }
-        }
-        
-        // Start polling after 2 seconds
-        setTimeout(pollHealth, 2000);
-        
-        // Add bot message
-        function addBotMessage(message) {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            const messageGroup = document.createElement('div');
-            messageGroup.className = 'message-group';
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message-bot';
-            
-            const avatar = document.createElement('div');
-            avatar.className = 'message-avatar';
-            avatar.innerHTML = '<i class="fas fa-robot"></i>';
-            
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            
-            const bubble = document.createElement('div');
-            bubble.className = 'message-bubble';
-            bubble.textContent = message;
-            
-            const meta = document.createElement('div');
-            meta.className = 'message-meta';
-            
-            const timeSpan = document.createElement('span');
-            timeSpan.className = 'message-time';
-            timeSpan.textContent = timeString;
-            
-            meta.appendChild(timeSpan);
-            
-            const sourceBadge = document.createElement('span');
-            sourceBadge.className = 'source-badge';
-            sourceBadge.innerHTML = '<i class="fas fa-database"></i> Medical DB';
-            meta.appendChild(sourceBadge);
-            
-            contentDiv.appendChild(bubble);
-            contentDiv.appendChild(meta);
-            
-            messageDiv.appendChild(avatar);
-            messageDiv.appendChild(contentDiv);
-            messageGroup.appendChild(messageDiv);
-            
-            chatMessages.appendChild(messageGroup);
-            scrollToBottom();
-            
-            addDebugLog('Bot message added');
-        }
-        
-        // Auto-resize Textarea
-        function autoResize() {
-            userInput.style.height = 'auto';
-            userInput.style.height = Math.min(userInput.scrollHeight, 100) + 'px';
-        }
-        
-        userInput.addEventListener('input', autoResize);
-        
-        // Scroll to Bottom
-        function scrollToBottom(smooth = true) {
-            chatMessages.scrollTo({
-                top: chatMessages.scrollHeight,
-                behavior: smooth ? 'smooth' : 'auto'
+
+            themeToggle.addEventListener('click', function() {
+                if (body.classList.contains('light-theme')) {
+                    body.className = 'dark-theme';
+                    localStorage.setItem('mediguide-theme', 'dark');
+                    updateThemeIcon('dark');
+                } else {
+                    body.className = 'light-theme';
+                    localStorage.setItem('mediguide-theme', 'light');
+                    updateThemeIcon('light');
+                }
             });
-        }
-        
-        // Add Message
-        function addMessage(message, isUser = false) {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            const messageGroup = document.createElement('div');
-            messageGroup.className = 'message-group';
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = isUser ? 'message-user' : 'message-bot';
-            
-            const avatar = document.createElement('div');
-            avatar.className = 'message-avatar';
-            avatar.innerHTML = isUser ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
-            
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            
-            const bubble = document.createElement('div');
-            bubble.className = 'message-bubble';
-            bubble.textContent = message;
-            
-            const meta = document.createElement('div');
-            meta.className = 'message-meta';
-            
-            const timeSpan = document.createElement('span');
-            timeSpan.className = 'message-time';
-            timeSpan.textContent = timeString;
-            
-            meta.appendChild(timeSpan);
-            
-            if (!isUser) {
-                const sourceBadge = document.createElement('span');
-                sourceBadge.className = 'source-badge';
-                sourceBadge.innerHTML = '<i class="fas fa-database"></i> Medical DB';
-                meta.appendChild(sourceBadge);
-            }
-            
-            contentDiv.appendChild(bubble);
-            contentDiv.appendChild(meta);
-            
-            if (isUser) {
-                messageDiv.appendChild(contentDiv);
-                messageDiv.appendChild(avatar);
-            } else {
-                messageDiv.appendChild(avatar);
-                messageDiv.appendChild(contentDiv);
-            }
-            
-            messageGroup.appendChild(messageDiv);
-            chatMessages.appendChild(messageGroup);
-            
-            scrollToBottom();
-            messageCount++;
-            
-            // Hide welcome section after first message
-            if (messageCount === 1 && isUser) {
-                const welcomeSection = document.querySelector('.welcome-section');
-                if (welcomeSection) {
-                    welcomeSection.style.display = 'none';
+
+            // ========== Mobile Drawer ==========
+            // Copy desktop sidebar content to mobile drawer
+            function copySidebarToDrawer() {
+                const desktopSidebar = document.querySelector('.sidebar .knowledge-panel');
+                const drawerContent = document.querySelector('.drawer-content');
+                if (desktopSidebar && drawerContent) {
+                    drawerContent.innerHTML = desktopSidebar.outerHTML;
+                    
+                    // Re-attach event listeners to drawer items
+                    attachPromptEvents(drawerContent);
                 }
             }
-            
-            addDebugLog(`${isUser ? 'User' : 'Bot'} message added`);
-        }
-        
-        // Typing Indicator
-        function showTypingIndicator() {
-            if (isTyping) return;
-            isTyping = true;
-            
-            const typingGroup = document.createElement('div');
-            typingGroup.className = 'message-group';
-            typingGroup.id = 'typingIndicator';
-            
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'message-bot';
-            
-            const avatar = document.createElement('div');
-            avatar.className = 'message-avatar';
-            avatar.innerHTML = '<i class="fas fa-robot"></i>';
-            
-            const indicator = document.createElement('div');
-            indicator.className = 'typing-indicator';
-            indicator.innerHTML = `
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-            `;
-            
-            typingDiv.appendChild(avatar);
-            typingDiv.appendChild(indicator);
-            typingGroup.appendChild(typingDiv);
-            
-            chatMessages.appendChild(typingGroup);
-            scrollToBottom();
-            
-            addDebugLog('Typing indicator shown');
-        }
-        
-        function removeTypingIndicator() {
-            const indicator = document.getElementById('typingIndicator');
-            if (indicator) {
-                indicator.remove();
-                addDebugLog('Typing indicator removed');
+            copySidebarToDrawer();
+
+            function openDrawer() {
+                drawer.classList.add('active');
+                overlay.classList.add('active');
+                body.style.overflow = 'hidden';
             }
-            isTyping = false;
-        }
-        
-        // Send Message
-        async function sendMessage(message) {
-            if (!isInitialized) {
-                addDebugLog('Message blocked - system not initialized', 'warning');
-                alert('System is still starting up. Please wait...');
-                return;
+
+            function closeDrawerFunc() {
+                drawer.classList.remove('active');
+                overlay.classList.remove('active');
+                body.style.overflow = '';
             }
-            
-            addDebugLog(`Sending message: ${message.substring(0, 30)}...`);
-            
-            try {
-                showTypingIndicator();
+
+            menuButton.addEventListener('click', openDrawer);
+            closeDrawer.addEventListener('click', closeDrawerFunc);
+            overlay.addEventListener('click', closeDrawerFunc);
+
+            // ========== Message Functions ==========
+            let isTyping = false;
+            let messageCount = 0;
+
+            function getTime() {
+                return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            function addMessage(text, isUser = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isUser ? 'user' : ''}`;
                 
-                const response = await fetch('/get', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({ 'msg': message })
+                if (isUser) {
+                    messageDiv.innerHTML = `
+                        <div class="bubble-container user">
+                            <div class="bubble user">${text}</div>
+                            <span class="time">${getTime()}</span>
+                        </div>
+                        <div class="avatar user">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    `;
+                } else {
+                    messageDiv.innerHTML = `
+                        <div class="avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="bubble-container">
+                            <div class="bubble bot">${text}</div>
+                            <span class="time">${getTime()}</span>
+                        </div>
+                    `;
+                }
+                
+                messages.appendChild(messageDiv);
+                scrollToBottom();
+                messageCount++;
+
+                // Hide welcome suggestions after first message
+                if (messageCount === 1 && isUser) {
+                    const suggestions = document.querySelector('.suggestions');
+                    if (suggestions) suggestions.style.display = 'none';
+                    const welcome = document.querySelector('.message.welcome');
+                    if (welcome) welcome.style.display = 'none';
+                }
+            }
+
+            function showTyping() {
+                if (isTyping) return;
+                isTyping = true;
+                typingIndicator.style.display = 'flex';
+                scrollToBottom();
+            }
+
+            function hideTyping() {
+                isTyping = false;
+                typingIndicator.style.display = 'none';
+            }
+
+            function scrollToBottom() {
+                messages.scrollTo({
+                    top: messages.scrollHeight,
+                    behavior: 'smooth'
                 });
-                
-                addDebugLog(`Response status: ${response.status}`);
-                
-                if (response.status === 503) {
-                    removeTypingIndicator();
-                    addDebugLog('Service unavailable (503)', 'warning');
-                    alert('System is still loading. Please wait...');
-                    return;
-                }
-                
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                
-                const data = await response.text();
-                addDebugLog(`Response received: ${data.substring(0, 30)}...`);
-                
-                removeTypingIndicator();
-                addMessage(data, false);
-                
-            } catch (error) {
-                addDebugLog(`Send error: ${error.message}`, 'error');
-                removeTypingIndicator();
-                addMessage('Connection issue. Please try again.', false);
             }
-        }
-        
-        // Form Submit
-        messageForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            if (!isInitialized) {
-                alert('System is starting up. Please wait...');
-                return;
+
+            // ========== Auto-resize Textarea ==========
+            function autoResize() {
+                userInput.style.height = 'auto';
+                userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
             }
-            
-            const message = userInput.value.trim();
-            if (!message || isTyping) return;
-            
-            addMessage(message, true);
-            
-            userInput.value = '';
-            autoResize();
-            
-            await sendMessage(message);
-        });
-        
-        // Quick Queries
-        document.querySelectorAll('.query-chip').forEach(chip => {
-            chip.addEventListener('click', function() {
-                if (!isInitialized) {
-                    alert('System is starting up. Please wait...');
-                    return;
+            userInput.addEventListener('input', autoResize);
+
+            // ========== Send Message ==========
+            async function sendMessage(message) {
+                try {
+                    showTyping();
+                    
+                    const response = await fetch('/get', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({ msg: message })
+                    });
+                    
+                    const data = await response.text();
+                    
+                    hideTyping();
+                    addMessage(data, false);
+                    
+                } catch (error) {
+                    hideTyping();
+                    addMessage("Connection issue. Please try again.", false);
                 }
-                
-                const query = this.getAttribute('data-query') || this.textContent.trim();
-                addDebugLog(`Quick query: ${query}`);
-                userInput.value = query;
-                autoResize();
-                messageForm.dispatchEvent(new Event('submit'));
-                
-                if (window.innerWidth <= 768) {
-                    chatSidebar.classList.remove('show');
-                    sidebarOverlay.classList.remove('show');
-                }
-            });
-        });
-        
-        // Encyclopedia Items
-        document.querySelectorAll('.encyclopedia-item').forEach(item => {
-            item.addEventListener('click', function() {
-                if (!isInitialized) {
-                    alert('System is starting up. Please wait...');
-                    return;
-                }
-                
-                const title = this.querySelector('h4').textContent;
-                addDebugLog(`Encyclopedia: ${title}`);
-                userInput.value = `Tell me about ${title}`;
-                autoResize();
-                messageForm.dispatchEvent(new Event('submit'));
-                
-                if (window.innerWidth <= 768) {
-                    chatSidebar.classList.remove('show');
-                    sidebarOverlay.classList.remove('show');
-                }
-            });
-        });
-        
-        // Mobile Menu Toggle
-        menuToggle.addEventListener('click', function() {
-            chatSidebar.classList.add('show');
-            sidebarOverlay.classList.add('show');
-            addDebugLog('Sidebar opened');
-        });
-        
-        sidebarOverlay.addEventListener('click', function() {
-            chatSidebar.classList.remove('show');
-            sidebarOverlay.classList.remove('show');
-            addDebugLog('Sidebar closed');
-        });
-        
-        // New Chat Button
-        newChatBtn.addEventListener('click', function() {
-            if (!isInitialized) {
-                alert('System is starting up. Please wait...');
-                return;
             }
-            
-            addDebugLog('New chat started');
-            
-            const messageGroups = document.querySelectorAll('.message-group');
-            messageGroups.forEach(group => {
-                if (!group.querySelector('.welcome-section')) {
-                    group.remove();
-                }
-            });
-            
-            const welcomeSection = document.querySelector('.welcome-section');
-            if (welcomeSection) {
-                welcomeSection.style.display = 'block';
-            }
-            
-            messageCount = 0;
-            scrollToBottom();
-        });
-        
-        // Enter key
-        userInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey && isInitialized) {
+
+            messageForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                messageForm.dispatchEvent(new Event('submit'));
+                
+                const message = userInput.value.trim();
+                if (!message || isTyping) return;
+                
+                addMessage(message, true);
+                userInput.value = '';
+                autoResize();
+                
+                sendMessage(message);
+            });
+
+            // ========== Prompt Handling ==========
+            function attachPromptEvents(container) {
+                // Category items
+                container.querySelectorAll('.category-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        const prompt = this.dataset.prompt || 
+                            `Tell me about ${this.querySelector('strong')?.textContent}`;
+                        userInput.value = prompt;
+                        autoResize();
+                        messageForm.dispatchEvent(new Event('submit'));
+                        closeDrawerFunc();
+                    });
+                });
+
+                // Quick prompt chips
+                container.querySelectorAll('.prompt-chip, .suggestion').forEach(chip => {
+                    chip.addEventListener('click', function() {
+                        const prompt = this.dataset.prompt || this.textContent.trim();
+                        userInput.value = prompt;
+                        autoResize();
+                        messageForm.dispatchEvent(new Event('submit'));
+                        closeDrawerFunc();
+                    });
+                });
             }
-        });
-        
-        // Initial scroll
-        setTimeout(scrollToBottom, 100);
-        
-        // Check CSS load
-        window.addEventListener('load', function() {
-            const links = document.getElementsByTagName('link');
-            let cssLoaded = false;
-            for (let link of links) {
-                if (link.rel === 'stylesheet' && link.href.includes('style.css')) {
-                    cssLoaded = true;
-                    addDebugLog(`CSS link found: ${link.href}`);
+
+            // Attach events to desktop sidebar
+            attachPromptEvents(document);
+
+            // ========== New Chat ==========
+            newChatBtn.addEventListener('click', function() {
+                // Clear messages except welcome
+                messages.innerHTML = `
+                    <div class="message welcome">
+                        <div class="avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="bubble-container">
+                            <div class="bubble bot">
+                                👋 Hi, I'm MediGuide AI. I can help with medical questions using 5 encyclopedias.
+                            </div>
+                            <span class="time">Just now</span>
+                        </div>
+                    </div>
+                    <div class="suggestions">
+                        <p class="suggestions-label">Try asking:</p>
+                        <div class="suggestions-list">
+                            <button class="suggestion" data-prompt="Early signs of diabetes?">
+                                <i class="fas fa-droplet"></i> Diabetes signs
+                            </button>
+                            <button class="suggestion" data-prompt="Anxiety relief techniques?">
+                                <i class="fas fa-heart"></i> Anxiety relief
+                            </button>
+                            <button class="suggestion" data-prompt="Child fever treatment?">
+                                <i class="fas fa-baby"></i> Child fever
+                            </button>
+                            <button class="suggestion" data-prompt="Best diet for high BP?">
+                                <i class="fas fa-heart-pulse"></i> BP diet
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                messageCount = 0;
+                attachPromptEvents(document);
+            });
+
+            // ========== Settings Modal ==========
+            settingsBtn.addEventListener('click', function() {
+                settingsModal.style.display = 'flex';
+            });
+
+            document.querySelector('.modal-close').addEventListener('click', function() {
+                settingsModal.style.display = 'none';
+            });
+
+            window.addEventListener('click', function(e) {
+                if (e.target === settingsModal) {
+                    settingsModal.style.display = 'none';
                 }
-            }
-            addDebugLog(`CSS loaded: ${cssLoaded ? '✅' : '❌'}`);
+            });
+
+            // Theme options in settings
+            document.querySelectorAll('.theme-option').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.theme-option').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const theme = this.dataset.theme;
+                    body.className = theme + '-theme';
+                    localStorage.setItem('mediguide-theme', theme);
+                    updateThemeIcon(theme);
+                });
+            });
+
+            // Enter key setting
+            const enterToSend = document.getElementById('enterToSend');
+            userInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    if (enterToSend.checked) {
+                        e.preventDefault();
+                        messageForm.dispatchEvent(new Event('submit'));
+                    }
+                }
+            });
+
+            // ========== Close drawer on resize (if desktop) ==========
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    closeDrawerFunc();
+                }
+            });
+
+            // ========== Initial Focus ==========
+            userInput.focus();
         });
     </script>
 </body>

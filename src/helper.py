@@ -1,55 +1,49 @@
-# src/helper.py - USING OPENAI EMBEDDINGS (NO HUGGINGFACE)
-from langchain_community.document_loaders import PyPDFLoader, DirectoryLoader
+from langchain.document_loaders import PyPDFLoader, DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings  # Changed from HuggingFace
+from langchain.embeddings import HuggingFaceEmbeddings
 from typing import List
 from langchain.schema import Document
-import os
 
-# No need for CUDA settings anymore
 
+#Extract Data From the PDF File
 def load_pdf_file(data):
-    """Load PDF files from directory"""
-    loader = DirectoryLoader(
-        data,
-        glob="*.pdf",
-        loader_cls=PyPDFLoader
-    )
-    documents = loader.load()
+    loader= DirectoryLoader(data,
+                            glob="*.pdf",
+                            loader_cls=PyPDFLoader)
+
+    documents=loader.load()
+
     return documents
 
 
+
 def filter_to_minimal_docs(docs: List[Document]) -> List[Document]:
-    """Filter documents to keep only essential metadata"""
-    minimal_docs = []
+    """
+    Given a list of Document objects, return a new list of Document objects
+    containing only 'source' in metadata and the original page_content.
+    """
+    minimal_docs: List[Document] = []
     for doc in docs:
-        if doc.page_content and len(doc.page_content.strip()) > 10:
-            src = doc.metadata.get("source", "unknown")
-            minimal_docs.append(
-                Document(
-                    page_content=doc.page_content.strip(),
-                    metadata={"source": src}
-                )
+        src = doc.metadata.get("source")
+        minimal_docs.append(
+            Document(
+                page_content=doc.page_content,
+                metadata={"source": src}
             )
+        )
     return minimal_docs
 
 
+
+#Split the Data into Text Chunks
 def text_split(extracted_data):
-    """Split documents into chunks"""
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,
-        chunk_overlap=20,
-        length_function=len
-    )
-    text_chunks = text_splitter.split_documents(extracted_data)
+    text_splitter=RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=20)
+    text_chunks=text_splitter.split_documents(extracted_data)
     return text_chunks
 
 
-def download_embeddings():  # Renamed function
-    """Get OpenAI embeddings - LIGHTWEIGHT (no local model)"""
-    embeddings = OpenAIEmbeddings(
-        model="text-embedding-ada-002",  # OpenAI's embedding model
-        openai_api_key=os.environ.get('OPENAI_API_KEY'),
-        chunk_size=1000  # Process in chunks
-    )
+
+#Download the Embeddings from HuggingFace 
+def download_hugging_face_embeddings():
+    embeddings=HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2')  #this model return 384 dimensions
     return embeddings
