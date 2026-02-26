@@ -12,5 +12,4 @@ torch==2.4.1
 transformers==4.45.2
 pypdf==5.0.1
 gunicorn==23.0.0
-```
 
