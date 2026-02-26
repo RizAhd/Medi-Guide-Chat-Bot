@@ -60,7 +60,8 @@ retriever = docsearch.as_retriever(
 chat_model = ChatOpenAI(
     model="gpt-4o", 
     temperature=0.3,
-    max_retries=2
+    max_retries=2,
+    request_timeout=60
 )
 
 # Memory store for conversations
@@ -105,10 +106,10 @@ def chat():
         )
         
         # Get response
-        result = conv_chain.run(msg)
+        result = conv_chain.invoke(msg)  # Changed from run() to invoke() for LangChain v0.3+
         logger.info(f"Response sent to {session_id}")
         
-        return str(result)
+        return str(result.get('answer', result))  # Handle different return formats
         
     except Exception as e:
         logger.error(f"Error processing message: {e}")
