@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>MediGuide AI · Medical Assistant</title>
-        
+    
     <!-- Custom CSS -->
     <link rel="stylesheet" href="../static/styles.css">
     <!-- Fonts -->
@@ -17,10 +17,10 @@
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
+    
 </head>
 <body class="light-theme">
-    <!-- Theme Toggle - Fixed Position -->
+    <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
         <i class="fas fa-sun"></i>
         <i class="fas fa-moon"></i>
@@ -34,9 +34,7 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <div class="drawer-content">
-            <!-- Knowledge Panel (will be populated via JS) -->
-        </div>
+        <div class="drawer-content" id="drawerContent"></div>
     </div>
     <div class="drawer-overlay" id="drawerOverlay"></div>
 
@@ -45,7 +43,7 @@
         <!-- Header -->
         <header class="header">
             <div class="header-left">
-                <button class="icon-button menu-button" id="menuButton">
+                <button class="icon-button menu-button" id="menuButton" aria-label="Menu">
                     <i class="fas fa-bars"></i>
                 </button>
                 <div class="logo">
@@ -54,10 +52,10 @@
                 </div>
             </div>
             <div class="header-right">
-                <button class="icon-button" id="newChatBtn">
+                <button class="icon-button" id="newChatBtn" aria-label="New chat">
                     <i class="fas fa-plus"></i>
                 </button>
-                <button class="icon-button" id="settingsBtn">
+                <button class="icon-button" id="settingsBtn" aria-label="Settings">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -65,12 +63,12 @@
 
         <!-- Main Content -->
         <div class="main">
-            <!-- Desktop Sidebar (hidden on mobile) -->
-            <aside class="sidebar desktop-only" id="desktopSidebar">
+            <!-- Desktop Sidebar -->
+            <aside class="sidebar desktop-sidebar" id="desktopSidebar">
                 <div class="knowledge-panel">
                     <div class="panel-header">
                         <i class="fas fa-database"></i>
-                        <div>
+                        <div class="panel-title">
                             <h3>Knowledge Base</h3>
                             <p>5 Medical Encyclopedias</p>
                         </div>
@@ -81,35 +79,35 @@
                         <div class="category-list">
                             <button class="category-item" data-prompt="Tell me about Gale Encyclopedia of Medicine">
                                 <i class="fas fa-book-medical"></i>
-                                <div>
+                                <div class="category-text">
                                     <strong>Gale Medicine</strong>
                                     <span>Diseases & Treatments</span>
                                 </div>
                             </button>
                             <button class="category-item" data-prompt="Tell me about mental health conditions">
                                 <i class="fas fa-brain"></i>
-                                <div>
+                                <div class="category-text">
                                     <strong>Mental Health</strong>
                                     <span>Psychology & Therapy</span>
                                 </div>
                             </button>
                             <button class="category-item" data-prompt="Tell me about nursing procedures">
                                 <i class="fas fa-user-nurse"></i>
-                                <div>
+                                <div class="category-text">
                                     <strong>Nursing & Allied</strong>
                                     <span>Patient Care</span>
                                 </div>
                             </button>
                             <button class="category-item" data-prompt="Tell me about children's health">
                                 <i class="fas fa-baby"></i>
-                                <div>
+                                <div class="category-text">
                                     <strong>Children's Health</strong>
                                     <span>Pediatrics</span>
                                 </div>
                             </button>
                             <button class="category-item" data-prompt="Tell me about nutrition and diet">
                                 <i class="fas fa-apple-alt"></i>
-                                <div>
+                                <div class="category-text">
                                     <strong>Diets & Nutrition</strong>
                                     <span>Wellness</span>
                                 </div>
@@ -157,14 +155,14 @@
                             <i class="fas fa-robot"></i>
                             <span class="status"></span>
                         </div>
-                        <div>
+                        <div class="assistant-info">
                             <h2>MediGuide AI</h2>
                             <p><span class="dot"></span> Online · Medical Assistant</p>
                         </div>
                     </div>
-                    <div class="chat-stats desktop-only">
-                        <div>5 Sources</div>
-                        <div>24/7 Available</div>
+                    <div class="chat-stats">
+                        <div class="stat"><span>5</span> Sources</div>
+                        <div class="stat"><span>24/7</span> Available</div>
                     </div>
                 </div>
 
@@ -225,7 +223,7 @@
                                 placeholder="Ask about symptoms, conditions..."
                                 rows="1"
                             ></textarea>
-                            <button type="submit" class="send-button" id="sendBtn">
+                            <button type="submit" class="send-button" id="sendBtn" aria-label="Send">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                         </div>
@@ -270,15 +268,19 @@
             const drawer = document.getElementById('promptsDrawer');
             const overlay = document.getElementById('drawerOverlay');
             const closeDrawer = document.getElementById('closeDrawer');
+            const drawerContent = document.getElementById('drawerContent');
             const messages = document.getElementById('messages');
             const messageForm = document.getElementById('messageForm');
             const userInput = document.getElementById('userInput');
-            const sendBtn = document.getElementById('sendBtn');
             const newChatBtn = document.getElementById('newChatBtn');
             const typingIndicator = document.getElementById('typingIndicator');
             const settingsBtn = document.getElementById('settingsBtn');
             const settingsModal = document.getElementById('settingsModal');
             
+            // ========== State ==========
+            let isTyping = false;
+            let messageCount = 0;
+
             // ========== Theme Management ==========
             const savedTheme = localStorage.getItem('mediguide-theme') || 'light';
             body.className = savedTheme + '-theme';
@@ -309,14 +311,10 @@
             });
 
             // ========== Mobile Drawer ==========
-            // Copy desktop sidebar content to mobile drawer
             function copySidebarToDrawer() {
-                const desktopSidebar = document.querySelector('.sidebar .knowledge-panel');
-                const drawerContent = document.querySelector('.drawer-content');
+                const desktopSidebar = document.querySelector('.desktop-sidebar .knowledge-panel');
                 if (desktopSidebar && drawerContent) {
                     drawerContent.innerHTML = desktopSidebar.outerHTML;
-                    
-                    // Re-attach event listeners to drawer items
                     attachPromptEvents(drawerContent);
                 }
             }
@@ -339,9 +337,6 @@
             overlay.addEventListener('click', closeDrawerFunc);
 
             // ========== Message Functions ==========
-            let isTyping = false;
-            let messageCount = 0;
-
             function getTime() {
                 return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             }
@@ -376,11 +371,10 @@
                 scrollToBottom();
                 messageCount++;
 
-                // Hide welcome suggestions after first message
                 if (messageCount === 1 && isUser) {
                     const suggestions = document.querySelector('.suggestions');
-                    if (suggestions) suggestions.style.display = 'none';
                     const welcome = document.querySelector('.message.welcome');
+                    if (suggestions) suggestions.style.display = 'none';
                     if (welcome) welcome.style.display = 'none';
                 }
             }
@@ -448,36 +442,34 @@
 
             // ========== Prompt Handling ==========
             function attachPromptEvents(container) {
-                // Category items
-                container.querySelectorAll('.category-item').forEach(item => {
-                    item.addEventListener('click', function() {
-                        const prompt = this.dataset.prompt || 
-                            `Tell me about ${this.querySelector('strong')?.textContent}`;
-                        userInput.value = prompt;
-                        autoResize();
-                        messageForm.dispatchEvent(new Event('submit'));
-                        closeDrawerFunc();
-                    });
-                });
-
-                // Quick prompt chips
-                container.querySelectorAll('.prompt-chip, .suggestion').forEach(chip => {
-                    chip.addEventListener('click', function() {
-                        const prompt = this.dataset.prompt || this.textContent.trim();
-                        userInput.value = prompt;
-                        autoResize();
-                        messageForm.dispatchEvent(new Event('submit'));
-                        closeDrawerFunc();
+                if (!container) return;
+                
+                container.querySelectorAll('.category-item, .prompt-chip, .suggestion').forEach(item => {
+                    item.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        let prompt = '';
+                        
+                        if (this.classList.contains('category-item')) {
+                            const strong = this.querySelector('strong');
+                            prompt = this.dataset.prompt || `Tell me about ${strong?.textContent || 'this topic'}`;
+                        } else {
+                            prompt = this.dataset.prompt || this.textContent.trim().replace(/[✚]/g, '').trim();
+                        }
+                        
+                        if (prompt) {
+                            userInput.value = prompt;
+                            autoResize();
+                            messageForm.dispatchEvent(new Event('submit'));
+                            closeDrawerFunc();
+                        }
                     });
                 });
             }
 
-            // Attach events to desktop sidebar
             attachPromptEvents(document);
 
             // ========== New Chat ==========
             newChatBtn.addEventListener('click', function() {
-                // Clear messages except welcome
                 messages.innerHTML = `
                     <div class="message welcome">
                         <div class="avatar">
@@ -518,7 +510,7 @@
                 settingsModal.style.display = 'flex';
             });
 
-            document.querySelector('.modal-close').addEventListener('click', function() {
+            document.querySelector('.modal-close')?.addEventListener('click', function() {
                 settingsModal.style.display = 'none';
             });
 
@@ -528,7 +520,6 @@
                 }
             });
 
-            // Theme options in settings
             document.querySelectorAll('.theme-option').forEach(btn => {
                 btn.addEventListener('click', function() {
                     document.querySelectorAll('.theme-option').forEach(b => b.classList.remove('active'));
@@ -541,25 +532,22 @@
                 });
             });
 
-            // Enter key setting
             const enterToSend = document.getElementById('enterToSend');
             userInput.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' && !e.shiftKey) {
-                    if (enterToSend.checked) {
+                    if (enterToSend?.checked) {
                         e.preventDefault();
                         messageForm.dispatchEvent(new Event('submit'));
                     }
                 }
             });
 
-            // ========== Close drawer on resize (if desktop) ==========
             window.addEventListener('resize', function() {
-                if (window.innerWidth > 768) {
+                if (window.innerWidth > 992) {
                     closeDrawerFunc();
                 }
             });
 
-            // ========== Initial Focus ==========
             userInput.focus();
         });
     </script>
