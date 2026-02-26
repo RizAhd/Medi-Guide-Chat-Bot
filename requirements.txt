@@ -1,12 +1,14 @@
-# requirements.txt
 flask==3.0.3
-langchain==0.3.14
-langchain-community==0.3.14
-langchain-openai==0.3.5
-langchain-pinecone==0.2.2
-sentence-transformers==3.4.1
-pinecone-client==6.0.1
-pinecone[grpc]==6.0.1
-pypdf==5.3.1
 python-dotenv==1.0.1
+langchain==0.3.7
+langchain-community==0.3.7
+langchain-openai==0.2.9
+langchain-pinecone==0.2.0
+pinecone-client==5.0.1
+openai==1.54.4
+sentence-transformers==3.3.1
+huggingface-hub==0.26.2
+torch==2.1.0
+transformers==4.46.3
+pypdf==5.1.0
 gunicorn==23.0.0
