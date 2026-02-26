@@ -4,15 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <meta name="theme-color" content="#0EA5A4" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#020617" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="format-detection" content="telephone=no">
-    <title>MediGuide AI · Medical Assistant</title>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>MediGuide · Medical AI</title>
     
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- IBM Plex Sans Font -->
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -24,54 +23,52 @@
     <!-- Theme Toggle -->
     <div class="theme-toggle-container">
         <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-            <i class="fas fa-sun"></i>
             <i class="fas fa-moon"></i>
+            <i class="fas fa-sun"></i>
         </button>
     </div>
+
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- Main App Container -->
     <div class="app-container">
         <!-- Top Bar -->
         <header class="top-bar">
             <div class="brand-section">
+                <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
                 <div class="brand-logo">
                     <i class="fas fa-stethoscope"></i>
                 </div>
                 <div class="brand-text">
-                    <h1>MediGuide</h1>
-                    <p>
-                        <span>AI Assistant</span>
-                        <span class="database-tag">5 Med Sources</span>
-                    </p>
+                    <h1 class="app-title">MediGuide</h1>
+                    <p>Medical AI · 5 Encyclopedias</p>
                 </div>
             </div>
             <div class="top-actions">
-                <button class="action-btn" id="newChatBtn" title="New Chat">
+                <button class="action-btn" id="newChatBtn" title="New chat">
                     <i class="fas fa-plus"></i>
                 </button>
-                <button class="action-btn" id="notificationsBtn" title="Notifications">
-                    <i class="fas fa-bell"></i>
-                    <span class="indicator" id="notificationIndicator" style="display: none;">3</span>
+                <button class="action-btn" id="historyBtn" title="History">
+                    <i class="fas fa-history"></i>
                 </button>
             </div>
         </header>
 
         <!-- Main Chat Interface -->
         <div class="chat-interface">
-            <!-- Sidebar Overlay -->
-            <div class="sidebar-overlay" id="sidebarOverlay"></div>
-            
-            <!-- Sidebar Drawer -->
+            <!-- Sidebar (Slide-out on mobile) -->
             <aside class="chat-sidebar" id="chatSidebar">
-                <!-- Knowledge Panel -->
                 <div class="knowledge-panel">
                     <div class="panel-header">
                         <div class="panel-icon">
                             <i class="fas fa-database"></i>
                         </div>
                         <div class="panel-title">
-                            <h3>Medical Library</h3>
-                            <p>5 Encyclopedia Sources</p>
+                            <h3>Knowledge Base</h3>
+                            <p>5 Medical Encyclopedias</p>
                         </div>
                     </div>
                     
@@ -99,8 +96,8 @@
                                 <i class="fas fa-user-nurse"></i>
                             </div>
                             <div class="encyclopedia-info">
-                                <h4>Nursing Guide</h4>
-                                <p>Care & Procedures</p>
+                                <h4>Nursing & Allied</h4>
+                                <p>Patient Care</p>
                             </div>
                         </div>
                         <div class="encyclopedia-item" data-source="pediatrics">
@@ -117,7 +114,7 @@
                                 <i class="fas fa-apple-alt"></i>
                             </div>
                             <div class="encyclopedia-info">
-                                <h4>Nutrition Guide</h4>
+                                <h4>Nutrition</h4>
                                 <p>Diet & Wellness</p>
                             </div>
                         </div>
@@ -127,12 +124,12 @@
                     <div class="quick-queries">
                         <h4>Quick Questions</h4>
                         <div class="queries-grid">
-                            <button class="query-chip" data-query="What are diabetes symptoms?">🩺 Diabetes</button>
-                            <button class="query-chip" data-query="How to treat anxiety?">🧠 Anxiety</button>
-                            <button class="query-chip" data-query="Child vaccine schedule?">💉 Vaccines</button>
-                            <button class="query-chip" data-query="Heart healthy foods?">❤️ Heart Health</button>
-                            <button class="query-chip" data-query="COVID-19 symptoms?">🦠 COVID-19</button>
-                            <button class="query-chip" data-query="Lower blood pressure?">📉 Blood Pressure</button>
+                            <button class="query-chip" data-query="Diabetes symptoms?">Diabetes</button>
+                            <button class="query-chip" data-query="Anxiety treatment?">Anxiety</button>
+                            <button class="query-chip" data-query="Vaccine schedule?">Vaccines</button>
+                            <button class="query-chip" data-query="Heart diet?">Heart Health</button>
+                            <button class="query-chip" data-query="COVID symptoms?">COVID-19</button>
+                            <button class="query-chip" data-query="Blood pressure?">BP</button>
                         </div>
                     </div>
                 </div>
@@ -140,25 +137,17 @@
 
             <!-- Main Chat Area -->
             <main class="chat-main">
-                <!-- Chat Header with Menu Toggle -->
+                <!-- Chat Header -->
                 <div class="chat-header">
                     <div class="assistant-info">
-                        <button class="menu-toggle" id="menuToggle" aria-label="Menu">
-                            <i class="fas fa-bars"></i>
-                        </button>
                         <div class="assistant-avatar">
-                            <div class="avatar-ring">
-                                <div class="avatar-inner">
-                                    <i class="fas fa-robot"></i>
-                                </div>
-                            </div>
-                            <span class="status-dot"></span>
+                            <i class="fas fa-robot"></i>
                         </div>
                         <div class="assistant-details">
                             <h2>MediGuide AI</h2>
                             <p>
-                                <i class="fas fa-circle" style="color: var(--success); font-size: 6px;"></i>
-                                Online · Medical AI
+                                <span class="status-dot"></span>
+                                Online · Medical Assistant
                             </p>
                         </div>
                     </div>
@@ -176,11 +165,11 @@
 
                 <!-- Chat Messages Container -->
                 <div class="chat-messages" id="chatMessages">
-                    <!-- Welcome Section - Short & Mobile Friendly -->
+                    <!-- Welcome Section - Compact -->
                     <div class="welcome-section">
                         <div class="welcome-content">
-                            <h1>Welcome! 👋</h1>
-                            <p>Ask me anything about symptoms, conditions, or treatments.</p>
+                            <h1>Welcome to MediGuide</h1>
+                            <p>Your medical AI assistant. Ask about symptoms, conditions, treatments, or general health.</p>
                         </div>
                         
                         <div class="ai-features">
@@ -189,28 +178,28 @@
                                     <i class="fas fa-robot"></i>
                                 </div>
                                 <h4>AI-Powered</h4>
-                                <p>Smart medical answers</p>
+                                <p>Medical intelligence</p>
                             </div>
                             <div class="feature">
                                 <div class="feature-icon">
                                     <i class="fas fa-shield-alt"></i>
                                 </div>
                                 <h4>Private</h4>
-                                <p>Secure & confidential</p>
+                                <p>Secure & encrypted</p>
                             </div>
                             <div class="feature">
                                 <div class="feature-icon">
                                     <i class="fas fa-bolt"></i>
                                 </div>
                                 <h4>Instant</h4>
-                                <p>Responses in seconds</p>
+                                <p>Real-time answers</p>
                             </div>
                             <div class="feature">
                                 <div class="feature-icon">
                                     <i class="fas fa-graduation-cap"></i>
                                 </div>
-                                <h4>Trusted</h4>
-                                <p>5 medical sources</p>
+                                <h4>Educational</h4>
+                                <p>Evidence-based</p>
                             </div>
                         </div>
                     </div>
@@ -223,12 +212,12 @@
                             </div>
                             <div class="message-content">
                                 <div class="message-bubble">
-                                    Hi! I'm your medical assistant. How can I help you today?
+                                    Hello! I'm MediGuide. Ask me about any medical topic — I have 5 medical encyclopedias at my disposal.
                                 </div>
                                 <div class="message-meta">
                                     <span class="message-time" id="currentTime"></span>
                                     <span class="source-badge">
-                                        <i class="fas fa-database"></i> Medical AI
+                                        <i class="fas fa-database"></i> Verified
                                     </span>
                                 </div>
                             </div>
@@ -241,23 +230,26 @@
                     <form id="messageForm" class="input-container">
                         <div class="chat-input-wrapper">
                             <div class="input-actions">
-                                <button type="button" class="input-action" id="voiceBtn" title="Voice input">
+                                <button type="button" class="input-action" id="attachBtn" title="Attach">
+                                    <i class="fas fa-paperclip"></i>
+                                </button>
+                                <button type="button" class="input-action" id="voiceBtn" title="Voice">
                                     <i class="fas fa-microphone"></i>
                                 </button>
                             </div>
                             <textarea 
                                 id="userInput" 
                                 class="chat-input" 
-                                placeholder="Ask a health question..." 
+                                placeholder="Ask about symptoms, conditions..." 
                                 rows="1"
-                                aria-label="Message input"
+                                aria-label="Message"
                             ></textarea>
                             <button type="submit" class="send-button" id="sendBtn" title="Send">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                         </div>
                         <p class="disclaimer-text">
-                            For informational use only. Not medical advice.
+                            For informational purposes only. Not medical advice.
                         </p>
                     </form>
                 </footer>
@@ -284,7 +276,7 @@
             let isTyping = false;
             let messageCount = 0;
             
-            // Theme Management - Default Light
+            // Theme Management - Default to light
             const savedTheme = localStorage.getItem('mediguide-theme') || 'light';
             if (savedTheme === 'dark') {
                 body.classList.remove('light-theme');
@@ -303,29 +295,6 @@
                 }
             });
             
-            // Sidebar Management
-            function openSidebar() {
-                chatSidebar.classList.add('show');
-                sidebarOverlay.classList.add('show');
-                document.body.style.overflow = 'hidden';
-            }
-            
-            function closeSidebar() {
-                chatSidebar.classList.remove('show');
-                sidebarOverlay.classList.remove('show');
-                document.body.style.overflow = '';
-            }
-            
-            menuToggle.addEventListener('click', openSidebar);
-            sidebarOverlay.addEventListener('click', closeSidebar);
-            
-            // Close sidebar on window resize if desktop
-            window.addEventListener('resize', function() {
-                if (window.innerWidth >= 1024) {
-                    closeSidebar();
-                }
-            });
-            
             // Update Time
             function updateTime() {
                 const now = new Date();
@@ -340,7 +309,7 @@
             // Auto-resize Textarea
             function autoResize() {
                 userInput.style.height = 'auto';
-                userInput.style.height = Math.min(userInput.scrollHeight, 80) + 'px';
+                userInput.style.height = Math.min(userInput.scrollHeight, 100) + 'px';
             }
             
             userInput.addEventListener('input', autoResize);
@@ -353,8 +322,8 @@
                 });
             }
             
-            // Add Message to Chat
-            function addMessage(message, isUser = false, source = null) {
+            // Add Message
+            function addMessage(message, isUser = false) {
                 const now = new Date();
                 const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 
@@ -387,7 +356,7 @@
                 if (!isUser) {
                     const sourceBadge = document.createElement('span');
                     sourceBadge.className = 'source-badge';
-                    sourceBadge.innerHTML = '<i class="fas fa-database"></i> ' + (source || 'Medical AI');
+                    sourceBadge.innerHTML = '<i class="fas fa-database"></i> Medical DB';
                     meta.appendChild(sourceBadge);
                 }
                 
@@ -408,7 +377,7 @@
                 scrollToBottom();
                 messageCount++;
                 
-                // Remove welcome section after first user message
+                // Hide welcome section after first message
                 if (messageCount === 1 && isUser) {
                     const welcomeSection = document.querySelector('.welcome-section');
                     if (welcomeSection) {
@@ -417,7 +386,7 @@
                 }
             }
             
-            // Show Typing Indicator
+            // Typing Indicator
             function showTypingIndicator() {
                 if (isTyping) return;
                 isTyping = true;
@@ -449,7 +418,6 @@
                 scrollToBottom();
             }
             
-            // Remove Typing Indicator
             function removeTypingIndicator() {
                 const indicator = document.getElementById('typingIndicator');
                 if (indicator) {
@@ -458,7 +426,7 @@
                 isTyping = false;
             }
             
-            // Send Message to Backend
+            // Send Message
             async function sendMessage(message) {
                 try {
                     showTypingIndicator();
@@ -468,53 +436,50 @@
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
                         },
-                        body: new URLSearchParams({
-                            'msg': message
-                        })
+                        body: new URLSearchParams({ 'msg': message })
                     });
                     
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
+                    if (!response.ok) throw new Error('Network error');
                     
                     const data = await response.text();
-                    
                     removeTypingIndicator();
-                    addMessage(data, false, 'Medical Database');
+                    addMessage(data, false);
                     
                 } catch (error) {
                     console.error('Error:', error);
                     removeTypingIndicator();
-                    addMessage('Connection issue. Please try again.', false, 'System');
+                    addMessage('Connection issue. Please try again.', false);
                 }
             }
             
-            // Handle Form Submit
+            // Form Submit
             messageForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
                 const message = userInput.value.trim();
                 if (!message || isTyping) return;
                 
-                // Add user message
                 addMessage(message, true);
                 
-                // Clear input
                 userInput.value = '';
                 autoResize();
                 
-                // Send to backend
                 await sendMessage(message);
             });
             
-            // Quick Query Chips
+            // Quick Queries
             document.querySelectorAll('.query-chip').forEach(chip => {
                 chip.addEventListener('click', function() {
-                    const query = this.getAttribute('data-query') || this.textContent.replace(/[🩺🧠💉❤️🦠📉]/g, '').trim();
+                    const query = this.getAttribute('data-query') || this.textContent.trim();
                     userInput.value = query;
                     autoResize();
                     messageForm.dispatchEvent(new Event('submit'));
-                    closeSidebar(); // Close sidebar on mobile after selection
+                    
+                    // Close sidebar on mobile after selection
+                    if (window.innerWidth <= 768) {
+                        chatSidebar.classList.remove('show');
+                        sidebarOverlay.classList.remove('show');
+                    }
                 });
             });
             
@@ -525,13 +490,28 @@
                     userInput.value = `Tell me about ${title}`;
                     autoResize();
                     messageForm.dispatchEvent(new Event('submit'));
-                    closeSidebar();
+                    
+                    // Close sidebar on mobile
+                    if (window.innerWidth <= 768) {
+                        chatSidebar.classList.remove('show');
+                        sidebarOverlay.classList.remove('show');
+                    }
                 });
+            });
+            
+            // Mobile Menu Toggle
+            menuToggle.addEventListener('click', function() {
+                chatSidebar.classList.add('show');
+                sidebarOverlay.classList.add('show');
+            });
+            
+            sidebarOverlay.addEventListener('click', function() {
+                chatSidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
             });
             
             // New Chat Button
             newChatBtn.addEventListener('click', function() {
-                // Clear all messages except welcome and initial
                 const messageGroups = document.querySelectorAll('.message-group');
                 messageGroups.forEach(group => {
                     if (group.id !== 'initialMessage') {
@@ -539,7 +519,6 @@
                     }
                 });
                 
-                // Show welcome section
                 const welcomeSection = document.querySelector('.welcome-section');
                 if (welcomeSection) {
                     welcomeSection.style.display = 'block';
@@ -549,7 +528,7 @@
                 scrollToBottom();
             });
             
-            // Handle Enter key
+            // Enter key
             userInput.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -557,33 +536,26 @@
                 }
             });
             
-            // Voice Input (placeholder)
+            // Voice (placeholder)
             document.getElementById('voiceBtn').addEventListener('click', function() {
-                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                    alert('🎤 Voice input coming soon!');
-                } else {
-                    alert('Voice input not supported in your browser');
-                }
+                alert('Voice input coming soon');
             });
             
-            // Notifications Button
-            document.getElementById('notificationsBtn').addEventListener('click', function() {
-                const indicator = document.getElementById('notificationIndicator');
-                indicator.style.display = 'none';
-                alert('No new notifications');
+            // Attach (placeholder)
+            document.getElementById('attachBtn').addEventListener('click', function() {
+                alert('File attachment coming soon');
             });
             
-            // Focus input on load
+            // History
+            document.getElementById('historyBtn').addEventListener('click', function() {
+                alert('Chat history coming soon');
+            });
+            
+            // Focus input
             userInput.focus();
             
             // Initial scroll
             setTimeout(scrollToBottom, 100);
-            
-            // Handle touch events for better mobile experience
-            let touchStartY = 0;
-            chatMessages.addEventListener('touchstart', function(e) {
-                touchStartY = e.touches[0].clientY;
-            }, { passive: true });
         });
     </script>
 </body>
