@@ -1,574 +1,589 @@
+<!-- templates/chat.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediGuide AI · Medical Intelligence Platform</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#0EA5A4" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#020617" media="(prefers-color-scheme: dark)">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="format-detection" content="telephone=no">
+    <title>MediGuide AI · Medical Assistant</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Source+Sans+Pro:wght@300;400;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="../static/style.css">
-    <style>
-        
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
-<body class="dark-theme">
+<body class="light-theme">
+    <!-- Theme Toggle -->
     <div class="theme-toggle-container">
-        <div class="theme-toggle" id="themeToggle">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
             <i class="fas fa-sun"></i>
             <i class="fas fa-moon"></i>
-        </div>
-    </div>
-    
-    <div class="particles" id="particles"></div>
-    
-    <div class="container-fluid">
-        <div class="app-wrapper">
-            <!-- Top Bar -->
-            <div class="top-bar">
-                <div class="brand-section">
-                    <div class="brand-logo">
-                        <i class="fas fa-brain"></i>
-                    </div>
-                    <div class="brand-text">
-                        <h1>MediGuide AI</h1>
-                        <p>
-                            <span>Medical Intelligence Platform</span>
-                            <span class="database-tag">5 Encyclopedia Database</span>
-                        </p>
-                    </div>
-                </div>
-                <div class="top-actions">
-                    <button class="action-btn active" title="New Chat">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                    <button class="action-btn" title="History">
-                        <i class="fas fa-history"></i>
-                    </button>
-                    <button class="action-btn" title="Settings">
-                        <i class="fas fa-cog"></i>
-                    </button>
-                    <button class="action-btn" title="Notifications">
-                        <i class="fas fa-bell"></i>
-                        <span class="indicator">3</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Main App Container -->
-            <div class="app-container">
-                <div class="chat-interface">
-                    <!-- Sidebar -->
-                    <div class="chat-sidebar">
-                        <div class="knowledge-panel">
-                            <div class="panel-header">
-                                <div class="panel-icon">
-                                    <i class="fas fa-database"></i>
-                                </div>
-                                <div class="panel-title">
-                                    <h3>Knowledge Base</h3>
-                                    <p>5 Medical Encyclopedias</p>
-                                </div>
-                            </div>
-                            <div class="encyclopedia-grid">
-                                <div class="encyclopedia-item">
-                                    <div class="encyclopedia-icon">
-                                        <i class="fas fa-book-medical"></i>
-                                    </div>
-                                    <div class="encyclopedia-info">
-                                        <h4>Gale Medicine</h4>
-                                        <p>Diseases & Treatments</p>
-                                    </div>
-                                </div>
-                                <div class="encyclopedia-item">
-                                    <div class="encyclopedia-icon">
-                                        <i class="fas fa-brain"></i>
-                                    </div>
-                                    <div class="encyclopedia-info">
-                                        <h4>Mental Health</h4>
-                                        <p>Psychology & Therapy</p>
-                                    </div>
-                                </div>
-                                <div class="encyclopedia-item">
-                                    <div class="encyclopedia-icon">
-                                        <i class="fas fa-user-nurse"></i>
-                                    </div>
-                                    <div class="encyclopedia-info">
-                                        <h4>Nursing & Allied</h4>
-                                        <p>Patient Care & Procedures</p>
-                                    </div>
-                                </div>
-                                <div class="encyclopedia-item">
-                                    <div class="encyclopedia-icon">
-                                        <i class="fas fa-baby"></i>
-                                    </div>
-                                    <div class="encyclopedia-info">
-                                        <h4>Children's Health</h4>
-                                        <p>Pediatrics & Development</p>
-                                    </div>
-                                </div>
-                                <div class="encyclopedia-item">
-                                    <div class="encyclopedia-icon">
-                                        <i class="fas fa-apple-alt"></i>
-                                    </div>
-                                    <div class="encyclopedia-info">
-                                        <h4>Diets & Nutrition</h4>
-                                        <p>Nutrition & Wellness</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="quick-queries">
-                                <h4 style="margin-bottom: 16px; font-weight: 600; color: var(--text-primary);">Quick Queries</h4>
-                                <div class="queries-grid">
-                                    <div class="query-chip" onclick="quickQuestion('Diabetes symptoms and management?')">
-                                        Diabetes
-                                    </div>
-                                    <div class="query-chip" onclick="quickQuestion('Anxiety treatment options?')">
-                                        Anxiety
-                                    </div>
-                                    <div class="query-chip" onclick="quickQuestion('Child vaccination schedule?')">
-                                        Vaccines
-                                    </div>
-                                    <div class="query-chip" onclick="quickQuestion('Heart healthy diet?')">
-                                        Heart Health
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Chat Main -->
-                    <div class="chat-main">
-                        <div class="chat-header">
-                            <div class="assistant-info">
-                                <div class="assistant-avatar">
-                                    <div class="avatar-ring">
-                                        <div class="avatar-inner">
-                                            <i class="fas fa-stethoscope"></i>
-                                        </div>
-                                    </div>
-                                    <div class="status-dot"></div>
-                                </div>
-                                <div class="assistant-details">
-                                    <h2>Dr. MediGuide AI</h2>
-                                    <p>
-                                        <i class="fas fa-circle" style="color: var(--success); font-size: 8px;"></i>
-                                        Online • Powered by Medical AI
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="chat-stats">
-                                <div class="stat-item">
-                                    <div class="stat-value">5</div>
-                                    <div class="stat-label">Sources</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-value">24/7</div>
-                                    <div class="stat-label">Available</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-value">99%</div>
-                                    <div class="stat-label">Accuracy</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Chat Messages -->
-                        <div id="messageFormeight" class="chat-messages">
-                            <!-- Welcome Section -->
-                            <div class="welcome-section">
-                                <div class="welcome-content">
-                                    <h1>Welcome to the Future of Medical Intelligence</h1>
-                                    <p>Experience AI-powered medical assistance backed by 5 authoritative Gale Medical Encyclopedias. Get accurate, reliable health information instantly.</p>
-                                </div>
-                                <div class="ai-features">
-                                    <div class="feature">
-                                        <div class="feature-icon">
-                                            <i class="fas fa-robot"></i>
-                                        </div>
-                                        <h4>AI-Powered Analysis</h4>
-                                        <p>Advanced medical AI analyzes your queries with contextual understanding</p>
-                                    </div>
-                                    <div class="feature">
-                                        <div class="feature-icon">
-                                            <i class="fas fa-shield-alt"></i>
-                                        </div>
-                                        <h4>Secure & Private</h4>
-                                        <p>Military-grade encryption ensures your medical queries remain confidential</p>
-                                    </div>
-                                    <div class="feature">
-                                        <div class="feature-icon">
-                                            <i class="fas fa-bolt"></i>
-                                        </div>
-                                        <h4>Instant Responses</h4>
-                                        <p>Get medically-verified answers in seconds, not hours</p>
-                                    </div>
-                                    <div class="feature">
-                                        <div class="feature-icon">
-                                            <i class="fas fa-graduation-cap"></i>
-                                        </div>
-                                        <h4>Educational Focus</h4>
-                                        <p>Learn about conditions, treatments, and preventive care</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Initial Message -->
-                            <div class="message-group">
-                                <div class="message-bot">
-                                    <div class="message-avatar">
-                                        <i class="fas fa-robot"></i>
-                                    </div>
-                                    <div class="message-content">
-                                        <div class="message-bubble">
-                                            Hello! I'm MediGuide AI, your advanced medical assistant. I have access to 5 authoritative medical encyclopedias and can help you with symptoms, conditions, treatments, preventive care, and general health information. How can I assist you today?
-                                        </div>
-                                        <div class="message-meta">
-                                            <span class="message-time" id="currentTime">10:30 AM</span>
-                                            <span class="source-badge">
-                                                <i class="fas fa-database"></i>
-                                                Medical Database Verified
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Input Section -->
-                        <div class="input-section">
-                            <form id="messageArea">
-                                <div class="input-container">
-                                    <div class="chat-input-wrapper">
-                                        <div class="input-actions">
-                                            <button type="button" class="input-action" title="Attach file">
-                                                <i class="fas fa-paperclip"></i>
-                                            </button>
-                                            <button type="button" class="input-action" title="Voice input">
-                                                <i class="fas fa-microphone"></i>
-                                            </button>
-                                        </div>
-                                        <textarea 
-                                            id="text" 
-                                            name="msg" 
-                                            placeholder="Describe your symptoms, ask about conditions, treatments, or general health information..." 
-                                            autocomplete="off" 
-                                            class="chat-input"
-                                            rows="1"
-                                            required
-                                        ></textarea>
-                                        <button type="submit" class="send-button" title="Send message">
-                                            <i class="fas fa-paper-plane"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </button>
     </div>
 
-    <script>
-        $(document).ready(function() {
-            // Theme toggle functionality
-            const themeToggle = $('#themeToggle');
-            const body = $('body');
+    <!-- Main App Container -->
+    <div class="app-container">
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div class="brand-section">
+                <div class="brand-logo">
+                    <i class="fas fa-stethoscope"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>MediGuide</h1>
+                    <p>
+                        <span>AI Assistant</span>
+                        <span class="database-tag">5 Med Sources</span>
+                    </p>
+                </div>
+            </div>
+            <div class="top-actions">
+                <button class="action-btn" id="newChatBtn" title="New Chat">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="action-btn" id="notificationsBtn" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="indicator" id="notificationIndicator" style="display: none;">3</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Chat Interface -->
+        <div class="chat-interface">
+            <!-- Sidebar Overlay -->
+            <div class="sidebar-overlay" id="sidebarOverlay"></div>
             
-            // Check for saved theme or default to dark
-            const savedTheme = localStorage.getItem('mediguide-theme') || 'dark';
-            if (savedTheme === 'light') {
-                body.removeClass('dark-theme').addClass('light-theme');
-            }
-            
-            // Toggle theme
-            themeToggle.click(function() {
-                if (body.hasClass('dark-theme')) {
-                    body.removeClass('dark-theme').addClass('light-theme');
-                    localStorage.setItem('mediguide-theme', 'light');
-                } else {
-                    body.removeClass('light-theme').addClass('dark-theme');
-                    localStorage.setItem('mediguide-theme', 'dark');
-                }
-            });
-            
-            // Create particles
-            function createParticles() {
-                const particlesContainer = document.getElementById('particles');
-                const particleCount = 30;
-                
-                for (let i = 0; i < particleCount; i++) {
-                    const particle = document.createElement('div');
-                    particle.className = 'particle';
+            <!-- Sidebar Drawer -->
+            <aside class="chat-sidebar" id="chatSidebar">
+                <!-- Knowledge Panel -->
+                <div class="knowledge-panel">
+                    <div class="panel-header">
+                        <div class="panel-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="panel-title">
+                            <h3>Medical Library</h3>
+                            <p>5 Encyclopedia Sources</p>
+                        </div>
+                    </div>
                     
-                    const size = Math.random() * 4 + 2;
-                    particle.style.width = `${size}px`;
-                    particle.style.height = `${size}px`;
-                    
-                    const x = Math.random() * 100;
-                    const y = Math.random() * 100;
-                    particle.style.left = `${x}%`;
-                    particle.style.top = `${y}%`;
-                    
-                    particle.style.opacity = Math.random() * 0.1 + 0.05;
-                    
-                    // Add animation
-                    particle.style.animation = `float ${Math.random() * 10 + 10}s infinite ease-in-out`;
-                    particle.style.animationDelay = `${Math.random() * 5}s`;
-                    
-                    particlesContainer.appendChild(particle);
-                }
-                
-                // Add CSS animation
-                const style = document.createElement('style');
-                style.textContent = `
-                    @keyframes float {
-                        0%, 100% { transform: translate(0, 0) rotate(0deg); }
-                        25% { transform: translate(${Math.random() * 20 - 10}px, ${Math.random() * 20 - 10}px) rotate(90deg); }
-                        50% { transform: translate(${Math.random() * 20 - 10}px, ${Math.random() * 20 - 10}px) rotate(180deg); }
-                        75% { transform: translate(${Math.random() * 20 - 10}px, ${Math.random() * 20 - 10}px) rotate(270deg); }
-                    }
-                `;
-                document.head.appendChild(style);
-            }
-            
-            createParticles();
-            
-            // Update time
-            function updateTime() {
-                const now = new Date();
-                const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                $('#currentTime').text(timeString);
-            }
-            
-            updateTime();
-            setInterval(updateTime, 60000);
-            
-            // Auto-resize textarea
-            const textarea = $('#text');
-            textarea.on('input', function() {
-                this.style.height = 'auto';
-                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-            });
-            
-            // Scroll to bottom
-            function scrollToBottom() {
-                const chatBody = $('#messageFormeight');
-                chatBody.scrollTop(chatBody[0].scrollHeight);
-            }
-            
-            setTimeout(scrollToBottom, 100);
-            
-            // Add message functions
-            function addMessage(message, isUser = false) {
-                const now = new Date();
-                const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                
-                const messageClass = isUser ? 'message-user' : 'message-bot';
-                const avatarIcon = isUser ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
-                const bubbleColor = isUser ? 'user' : 'bot';
-                
-                const messageHtml = `
-                    <div class="message-group">
-                        <div class="${messageClass}">
-                            <div class="message-avatar">
-                                ${avatarIcon}
+                    <div class="encyclopedia-grid">
+                        <div class="encyclopedia-item" data-source="gale-medicine">
+                            <div class="encyclopedia-icon">
+                                <i class="fas fa-book-medical"></i>
                             </div>
-                            <div class="message-content">
-                                <div class="message-bubble">
-                                    ${message}
-                                </div>
-                                <div class="message-meta">
-                                    <span class="message-time">${timeString}</span>
-                                    ${!isUser ? '<span class="source-badge"><i class="fas fa-database"></i> Medical Database Verified</span>' : ''}
-                                </div>
+                            <div class="encyclopedia-info">
+                                <h4>Gale Medicine</h4>
+                                <p>Diseases & Treatments</p>
+                            </div>
+                        </div>
+                        <div class="encyclopedia-item" data-source="mental-health">
+                            <div class="encyclopedia-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div class="encyclopedia-info">
+                                <h4>Mental Health</h4>
+                                <p>Psychology & Therapy</p>
+                            </div>
+                        </div>
+                        <div class="encyclopedia-item" data-source="nursing">
+                            <div class="encyclopedia-icon">
+                                <i class="fas fa-user-nurse"></i>
+                            </div>
+                            <div class="encyclopedia-info">
+                                <h4>Nursing Guide</h4>
+                                <p>Care & Procedures</p>
+                            </div>
+                        </div>
+                        <div class="encyclopedia-item" data-source="pediatrics">
+                            <div class="encyclopedia-icon">
+                                <i class="fas fa-baby"></i>
+                            </div>
+                            <div class="encyclopedia-info">
+                                <h4>Children's Health</h4>
+                                <p>Pediatrics</p>
+                            </div>
+                        </div>
+                        <div class="encyclopedia-item" data-source="nutrition">
+                            <div class="encyclopedia-icon">
+                                <i class="fas fa-apple-alt"></i>
+                            </div>
+                            <div class="encyclopedia-info">
+                                <h4>Nutrition Guide</h4>
+                                <p>Diet & Wellness</p>
                             </div>
                         </div>
                     </div>
-                `;
-                
-                $('#messageFormeight').append(messageHtml);
-                scrollToBottom();
-            }
-            
-            // Show typing indicator
-            function showTyping() {
-                const typingHtml = `
-                    <div class="message-group" id="typingIndicator">
-                        <div class="message-bot">
-                            <div class="message-avatar">
-                                <i class="fas fa-robot"></i>
-                            </div>
-                            <div class="typing-indicator">
-                                <div class="typing-dot"></div>
-                                <div class="typing-dot"></div>
-                                <div class="typing-dot"></div>
-                            </div>
+
+                    <!-- Quick Queries -->
+                    <div class="quick-queries">
+                        <h4>Quick Questions</h4>
+                        <div class="queries-grid">
+                            <button class="query-chip" data-query="What are diabetes symptoms?">🩺 Diabetes</button>
+                            <button class="query-chip" data-query="How to treat anxiety?">🧠 Anxiety</button>
+                            <button class="query-chip" data-query="Child vaccine schedule?">💉 Vaccines</button>
+                            <button class="query-chip" data-query="Heart healthy foods?">❤️ Heart Health</button>
+                            <button class="query-chip" data-query="COVID-19 symptoms?">🦠 COVID-19</button>
+                            <button class="query-chip" data-query="Lower blood pressure?">📉 Blood Pressure</button>
                         </div>
                     </div>
-                `;
-                
-                $('#messageFormeight').append(typingHtml);
-                scrollToBottom();
-            }
-            
-            // Remove typing indicator
-            function removeTyping() {
-                $('#typingIndicator').remove();
-            }
-            
-            // Handle form submission
-            $('#messageArea').on('submit', function(event) {
-                event.preventDefault();
-                
-                const message = $('#text').val().trim();
-                if (!message) return;
-                
-                // Add user message
-                addMessage(message, true);
-                
-                // Clear input
-                $('#text').val('');
-                textarea[0].style.height = '56px';
-                
-                // Show typing
-                showTyping();
-                
-                // Send to backend
-                $.ajax({
-                    data: { msg: message },
-                    type: 'POST',
-                    url: '/get',
-                    success: function(response) {
-                        setTimeout(function() {
-                            removeTyping();
-                            addMessage(response, false);
-                        }, 1500); // Simulate thinking time
-                    },
-                    error: function() {
-                        removeTyping();
-                        addMessage('I apologize, but I\'m currently experiencing connectivity issues with the medical database. Please try again in a moment.', false);
-                    }
-                });
-            });
-            
-            // Quick question function
-            window.quickQuestion = function(question) {
-                $('#text').val(question);
-                $('#messageArea').submit();
-            };
-            
-            // Header actions
-            $('.action-btn').eq(0).click(function() {
-                $('.action-btn').removeClass('active');
-                $(this).addClass('active');
-                
-                $('#messageFormeight').html(`
+                </div>
+            </aside>
+
+            <!-- Main Chat Area -->
+            <main class="chat-main">
+                <!-- Chat Header with Menu Toggle -->
+                <div class="chat-header">
+                    <div class="assistant-info">
+                        <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <div class="assistant-avatar">
+                            <div class="avatar-ring">
+                                <div class="avatar-inner">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                            </div>
+                            <span class="status-dot"></span>
+                        </div>
+                        <div class="assistant-details">
+                            <h2>MediGuide AI</h2>
+                            <p>
+                                <i class="fas fa-circle" style="color: var(--success); font-size: 6px;"></i>
+                                Online · Medical AI
+                            </p>
+                        </div>
+                    </div>
+                    <div class="chat-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">5</div>
+                            <div class="stat-label">Sources</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">24/7</div>
+                            <div class="stat-label">Support</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Messages Container -->
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Welcome Section - Short & Mobile Friendly -->
                     <div class="welcome-section">
                         <div class="welcome-content">
-                            <h1>Welcome to the Future of Medical Intelligence</h1>
-                            <p>Experience AI-powered medical assistance backed by 5 authoritative Gale Medical Encyclopedias. Get accurate, reliable health information instantly.</p>
+                            <h1>Welcome! 👋</h1>
+                            <p>Ask me anything about symptoms, conditions, or treatments.</p>
                         </div>
+                        
                         <div class="ai-features">
                             <div class="feature">
                                 <div class="feature-icon">
                                     <i class="fas fa-robot"></i>
                                 </div>
-                                <h4>AI-Powered Analysis</h4>
-                                <p>Advanced medical AI analyzes your queries with contextual understanding</p>
+                                <h4>AI-Powered</h4>
+                                <p>Smart medical answers</p>
                             </div>
                             <div class="feature">
                                 <div class="feature-icon">
                                     <i class="fas fa-shield-alt"></i>
                                 </div>
-                                <h4>Secure & Private</h4>
-                                <p>Military-grade encryption ensures your medical queries remain confidential</p>
+                                <h4>Private</h4>
+                                <p>Secure & confidential</p>
                             </div>
                             <div class="feature">
                                 <div class="feature-icon">
                                     <i class="fas fa-bolt"></i>
                                 </div>
-                                <h4>Instant Responses</h4>
-                                <p>Get medically-verified answers in seconds, not hours</p>
+                                <h4>Instant</h4>
+                                <p>Responses in seconds</p>
                             </div>
                             <div class="feature">
                                 <div class="feature-icon">
                                     <i class="fas fa-graduation-cap"></i>
                                 </div>
-                                <h4>Educational Focus</h4>
-                                <p>Learn about conditions, treatments, and preventive care</p>
+                                <h4>Trusted</h4>
+                                <p>5 medical sources</p>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="message-group">
+
+                    <!-- Initial Bot Message -->
+                    <div class="message-group" id="initialMessage">
                         <div class="message-bot">
                             <div class="message-avatar">
                                 <i class="fas fa-robot"></i>
                             </div>
                             <div class="message-content">
                                 <div class="message-bubble">
-                                    Hello! I'm MediGuide AI, your advanced medical assistant. I have access to 5 authoritative medical encyclopedias and can help you with symptoms, conditions, treatments, preventive care, and general health information. How can I assist you today?
+                                    Hi! I'm your medical assistant. How can I help you today?
                                 </div>
                                 <div class="message-meta">
-                                    <span class="message-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                    <span class="message-time" id="currentTime"></span>
                                     <span class="source-badge">
-                                        <i class="fas fa-database"></i>
-                                        Medical Database Verified
+                                        <i class="fas fa-database"></i> Medical AI
                                     </span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                `);
-            });
+                </div>
+
+                <!-- Input Section -->
+                <footer class="input-section">
+                    <form id="messageForm" class="input-container">
+                        <div class="chat-input-wrapper">
+                            <div class="input-actions">
+                                <button type="button" class="input-action" id="voiceBtn" title="Voice input">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
+                            </div>
+                            <textarea 
+                                id="userInput" 
+                                class="chat-input" 
+                                placeholder="Ask a health question..." 
+                                rows="1"
+                                aria-label="Message input"
+                            ></textarea>
+                            <button type="submit" class="send-button" id="sendBtn" title="Send">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                        <p class="disclaimer-text">
+                            For informational use only. Not medical advice.
+                        </p>
+                    </form>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+            const chatMessages = document.getElementById('chatMessages');
+            const messageForm = document.getElementById('messageForm');
+            const userInput = document.getElementById('userInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const newChatBtn = document.getElementById('newChatBtn');
+            const menuToggle = document.getElementById('menuToggle');
+            const chatSidebar = document.getElementById('chatSidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            const currentTimeSpan = document.getElementById('currentTime');
             
-            // Encyclopedia items click
-            $('.encyclopedia-item').click(function() {
-                const title = $(this).find('h4').text();
-                const desc = $(this).find('p').text();
-                
-                $('#text').val(`Tell me more about ${title} from the ${desc}`);
-                $('#messageArea').submit();
-            });
+            // State
+            let isTyping = false;
+            let messageCount = 0;
             
-            // Focus input
-            $('#text').focus();
+            // Theme Management - Default Light
+            const savedTheme = localStorage.getItem('mediguide-theme') || 'light';
+            if (savedTheme === 'dark') {
+                body.classList.remove('light-theme');
+                body.classList.add('dark-theme');
+            }
             
-            // Enter key handling
-            $('#text').keydown(function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    $('#messageArea').submit();
+            themeToggle.addEventListener('click', function() {
+                if (body.classList.contains('light-theme')) {
+                    body.classList.remove('light-theme');
+                    body.classList.add('dark-theme');
+                    localStorage.setItem('mediguide-theme', 'dark');
+                } else {
+                    body.classList.remove('dark-theme');
+                    body.classList.add('light-theme');
+                    localStorage.setItem('mediguide-theme', 'light');
                 }
             });
             
-            // Add animation to features on scroll
-            const observerOptions = {
-                threshold: 0.1
-            };
+            // Sidebar Management
+            function openSidebar() {
+                chatSidebar.classList.add('show');
+                sidebarOverlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
             
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
+            function closeSidebar() {
+                chatSidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+            
+            menuToggle.addEventListener('click', openSidebar);
+            sidebarOverlay.addEventListener('click', closeSidebar);
+            
+            // Close sidebar on window resize if desktop
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 1024) {
+                    closeSidebar();
+                }
+            });
+            
+            // Update Time
+            function updateTime() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                if (currentTimeSpan) {
+                    currentTimeSpan.textContent = timeString;
+                }
+            }
+            updateTime();
+            setInterval(updateTime, 60000);
+            
+            // Auto-resize Textarea
+            function autoResize() {
+                userInput.style.height = 'auto';
+                userInput.style.height = Math.min(userInput.scrollHeight, 80) + 'px';
+            }
+            
+            userInput.addEventListener('input', autoResize);
+            
+            // Scroll to Bottom
+            function scrollToBottom(smooth = true) {
+                chatMessages.scrollTo({
+                    top: chatMessages.scrollHeight,
+                    behavior: smooth ? 'smooth' : 'auto'
+                });
+            }
+            
+            // Add Message to Chat
+            function addMessage(message, isUser = false, source = null) {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                const messageGroup = document.createElement('div');
+                messageGroup.className = 'message-group';
+                
+                const messageDiv = document.createElement('div');
+                messageDiv.className = isUser ? 'message-user' : 'message-bot';
+                
+                const avatar = document.createElement('div');
+                avatar.className = 'message-avatar';
+                avatar.innerHTML = isUser ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+                
+                const bubble = document.createElement('div');
+                bubble.className = 'message-bubble';
+                bubble.textContent = message;
+                
+                const meta = document.createElement('div');
+                meta.className = 'message-meta';
+                
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'message-time';
+                timeSpan.textContent = timeString;
+                
+                meta.appendChild(timeSpan);
+                
+                if (!isUser) {
+                    const sourceBadge = document.createElement('span');
+                    sourceBadge.className = 'source-badge';
+                    sourceBadge.innerHTML = '<i class="fas fa-database"></i> ' + (source || 'Medical AI');
+                    meta.appendChild(sourceBadge);
+                }
+                
+                contentDiv.appendChild(bubble);
+                contentDiv.appendChild(meta);
+                
+                if (isUser) {
+                    messageDiv.appendChild(contentDiv);
+                    messageDiv.appendChild(avatar);
+                } else {
+                    messageDiv.appendChild(avatar);
+                    messageDiv.appendChild(contentDiv);
+                }
+                
+                messageGroup.appendChild(messageDiv);
+                chatMessages.appendChild(messageGroup);
+                
+                scrollToBottom();
+                messageCount++;
+                
+                // Remove welcome section after first user message
+                if (messageCount === 1 && isUser) {
+                    const welcomeSection = document.querySelector('.welcome-section');
+                    if (welcomeSection) {
+                        welcomeSection.style.display = 'none';
+                    }
+                }
+            }
+            
+            // Show Typing Indicator
+            function showTypingIndicator() {
+                if (isTyping) return;
+                isTyping = true;
+                
+                const typingGroup = document.createElement('div');
+                typingGroup.className = 'message-group';
+                typingGroup.id = 'typingIndicator';
+                
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'message-bot';
+                
+                const avatar = document.createElement('div');
+                avatar.className = 'message-avatar';
+                avatar.innerHTML = '<i class="fas fa-robot"></i>';
+                
+                const indicator = document.createElement('div');
+                indicator.className = 'typing-indicator';
+                indicator.innerHTML = `
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                `;
+                
+                typingDiv.appendChild(avatar);
+                typingDiv.appendChild(indicator);
+                typingGroup.appendChild(typingDiv);
+                
+                chatMessages.appendChild(typingGroup);
+                scrollToBottom();
+            }
+            
+            // Remove Typing Indicator
+            function removeTypingIndicator() {
+                const indicator = document.getElementById('typingIndicator');
+                if (indicator) {
+                    indicator.remove();
+                }
+                isTyping = false;
+            }
+            
+            // Send Message to Backend
+            async function sendMessage(message) {
+                try {
+                    showTypingIndicator();
+                    
+                    const response = await fetch('/get', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams({
+                            'msg': message
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    
+                    const data = await response.text();
+                    
+                    removeTypingIndicator();
+                    addMessage(data, false, 'Medical Database');
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    removeTypingIndicator();
+                    addMessage('Connection issue. Please try again.', false, 'System');
+                }
+            }
+            
+            // Handle Form Submit
+            messageForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const message = userInput.value.trim();
+                if (!message || isTyping) return;
+                
+                // Add user message
+                addMessage(message, true);
+                
+                // Clear input
+                userInput.value = '';
+                autoResize();
+                
+                // Send to backend
+                await sendMessage(message);
+            });
+            
+            // Quick Query Chips
+            document.querySelectorAll('.query-chip').forEach(chip => {
+                chip.addEventListener('click', function() {
+                    const query = this.getAttribute('data-query') || this.textContent.replace(/[🩺🧠💉❤️🦠📉]/g, '').trim();
+                    userInput.value = query;
+                    autoResize();
+                    messageForm.dispatchEvent(new Event('submit'));
+                    closeSidebar(); // Close sidebar on mobile after selection
+                });
+            });
+            
+            // Encyclopedia Items
+            document.querySelectorAll('.encyclopedia-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const title = this.querySelector('h4').textContent;
+                    userInput.value = `Tell me about ${title}`;
+                    autoResize();
+                    messageForm.dispatchEvent(new Event('submit'));
+                    closeSidebar();
+                });
+            });
+            
+            // New Chat Button
+            newChatBtn.addEventListener('click', function() {
+                // Clear all messages except welcome and initial
+                const messageGroups = document.querySelectorAll('.message-group');
+                messageGroups.forEach(group => {
+                    if (group.id !== 'initialMessage') {
+                        group.remove();
                     }
                 });
-            }, observerOptions);
-            
-            // Observe feature cards
-            $('.feature').each(function() {
-                $(this).css({
-                    'opacity': '0',
-                    'transform': 'translateY(20px)',
-                    'transition': 'all 0.6s ease-out'
-                });
-                observer.observe(this);
+                
+                // Show welcome section
+                const welcomeSection = document.querySelector('.welcome-section');
+                if (welcomeSection) {
+                    welcomeSection.style.display = 'block';
+                }
+                
+                messageCount = 0;
+                scrollToBottom();
             });
+            
+            // Handle Enter key
+            userInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    messageForm.dispatchEvent(new Event('submit'));
+                }
+            });
+            
+            // Voice Input (placeholder)
+            document.getElementById('voiceBtn').addEventListener('click', function() {
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    alert('🎤 Voice input coming soon!');
+                } else {
+                    alert('Voice input not supported in your browser');
+                }
+            });
+            
+            // Notifications Button
+            document.getElementById('notificationsBtn').addEventListener('click', function() {
+                const indicator = document.getElementById('notificationIndicator');
+                indicator.style.display = 'none';
+                alert('No new notifications');
+            });
+            
+            // Focus input on load
+            userInput.focus();
+            
+            // Initial scroll
+            setTimeout(scrollToBottom, 100);
+            
+            // Handle touch events for better mobile experience
+            let touchStartY = 0;
+            chatMessages.addEventListener('touchstart', function(e) {
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
         });
     </script>
 </body>
