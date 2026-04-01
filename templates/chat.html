@@ -1,122 +1,137 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <link rel="icon" href="../static/mg.png" type="image/png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#0a0f1e">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>MediGuide AI · Medical Assistant</title>
-    
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="../static/styles.css">
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="light-theme">
-    <!-- Theme Toggle -->
-    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-        <i class="fas fa-sun"></i>
-        <i class="fas fa-moon"></i>
-    </button>
-
-    <!-- Mobile Prompts Drawer -->
     <div class="prompts-drawer" id="promptsDrawer">
         <div class="drawer-header">
-            <h3>Medical Knowledge</h3>
-            <button class="drawer-close" id="closeDrawer">
-                <i class="fas fa-times"></i>
+            <div class="drawer-brand">
+                <i class="fas fa-plus-square"></i>
+                <span>Medical Knowledge</span>
+            </div>
+            <button class="drawer-close" id="closeDrawer" aria-label="Close">
+                <i class="fas fa-xmark"></i>
             </button>
         </div>
         <div class="drawer-content" id="drawerContent"></div>
     </div>
     <div class="drawer-overlay" id="drawerOverlay"></div>
-
-    <!-- Main Container -->
     <div class="app">
-        <!-- Header -->
         <header class="header">
             <div class="header-left">
-                <button class="icon-button menu-button" id="menuButton" aria-label="Menu">
-                    <i class="fas fa-bars"></i>
+                <button class="menu-button" id="menuButton" aria-label="Menu">
+                    <i class="fas fa-bars-staggered"></i>
                 </button>
                 <div class="logo">
-                    <i class="fas fa-stethoscope"></i>
-                    <span>MediGuide AI</span>
+                    <div class="logo-icon">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-name">MediGuide</span>
+                        <span class="logo-tag">AI</span>
+                    </div>
                 </div>
             </div>
+
+            <div class="header-center">
+                <div class="header-brand-full">
+                    <div class="hb-logo-icon"><i class="fas fa-stethoscope"></i></div>
+                    <div class="hb-text">
+                        <span class="hb-name">MediGuide</span>
+                        <span class="hb-sub">Medical AI Assistant</span>
+                    </div>
+                    <div class="pulse-badge">
+                        <span class="pulse-dot"></span>
+                        <span>Online</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="header-right">
-                <button class="icon-button" id="newChatBtn" aria-label="New chat">
-                    <i class="fas fa-plus"></i>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <i class="fas fa-sun"></i>
+                    <i class="fas fa-moon"></i>
                 </button>
-                <button class="icon-button" id="settingsBtn" aria-label="Settings">
-                    <i class="fas fa-cog"></i>
+                <button class="icon-button" id="newChatBtn" aria-label="New chat" title="New chat">
+                    <i class="fas fa-pen-to-square"></i>
+                </button>
+                <button class="icon-button" id="settingsBtn" aria-label="Settings" title="Settings">
+                    <i class="fas fa-sliders"></i>
                 </button>
             </div>
         </header>
-
-        <!-- Main Content -->
         <div class="main">
-            <!-- Desktop Sidebar -->
             <aside class="sidebar desktop-sidebar" id="desktopSidebar">
                 <div class="knowledge-panel">
+
                     <div class="panel-header">
-                        <i class="fas fa-database"></i>
+                        <div class="panel-icon">
+                            <i class="fas fa-book-medical"></i>
+                        </div>
                         <div class="panel-title">
                             <h3>Knowledge Base</h3>
                             <p>5 Medical Encyclopedias</p>
                         </div>
                     </div>
-                    
+
                     <div class="categories">
-                        <h4>Categories</h4>
+                        <h4 class="section-label"><i class="fas fa-layer-group"></i> Categories</h4>
                         <div class="category-list">
                             <button class="category-item" data-prompt="Tell me about Gale Encyclopedia of Medicine">
-                                <i class="fas fa-book-medical"></i>
+                                <div class="cat-icon"><i class="fas fa-book-medical"></i></div>
                                 <div class="category-text">
                                     <strong>Gale Medicine</strong>
-                                    <span>Diseases & Treatments</span>
+                                    <span>Diseases &amp; Treatments</span>
                                 </div>
+                                <i class="fas fa-chevron-right cat-arrow"></i>
                             </button>
                             <button class="category-item" data-prompt="Tell me about mental health conditions">
-                                <i class="fas fa-brain"></i>
+                                <div class="cat-icon"><i class="fas fa-brain"></i></div>
                                 <div class="category-text">
                                     <strong>Mental Health</strong>
-                                    <span>Psychology & Therapy</span>
+                                    <span>Psychology &amp; Therapy</span>
                                 </div>
+                                <i class="fas fa-chevron-right cat-arrow"></i>
                             </button>
                             <button class="category-item" data-prompt="Tell me about nursing procedures">
-                                <i class="fas fa-user-nurse"></i>
+                                <div class="cat-icon"><i class="fas fa-user-nurse"></i></div>
                                 <div class="category-text">
-                                    <strong>Nursing & Allied</strong>
+                                    <strong>Nursing &amp; Allied</strong>
                                     <span>Patient Care</span>
                                 </div>
+                                <i class="fas fa-chevron-right cat-arrow"></i>
                             </button>
                             <button class="category-item" data-prompt="Tell me about children's health">
-                                <i class="fas fa-baby"></i>
+                                <div class="cat-icon"><i class="fas fa-baby"></i></div>
                                 <div class="category-text">
                                     <strong>Children's Health</strong>
                                     <span>Pediatrics</span>
                                 </div>
+                                <i class="fas fa-chevron-right cat-arrow"></i>
                             </button>
                             <button class="category-item" data-prompt="Tell me about nutrition and diet">
-                                <i class="fas fa-apple-alt"></i>
+                                <div class="cat-icon"><i class="fas fa-apple-whole"></i></div>
                                 <div class="category-text">
-                                    <strong>Diets & Nutrition</strong>
+                                    <strong>Diets &amp; Nutrition</strong>
                                     <span>Wellness</span>
                                 </div>
+                                <i class="fas fa-chevron-right cat-arrow"></i>
                             </button>
                         </div>
                     </div>
 
                     <div class="quick-prompts">
-                        <h4>Quick Questions</h4>
+                        <h4 class="section-label"><i class="fas fa-bolt"></i> Quick Ask</h4>
                         <div class="prompt-grid">
                             <button class="prompt-chip" data-prompt="What are symptoms of diabetes?">
                                 <i class="fas fa-droplet"></i> Diabetes
@@ -128,10 +143,10 @@
                                 <i class="fas fa-syringe"></i> Vaccines
                             </button>
                             <button class="prompt-chip" data-prompt="Heart healthy foods?">
-                                <i class="fas fa-heart-pulse"></i> Heart Health
+                                <i class="fas fa-heart-pulse"></i> Heart
                             </button>
                             <button class="prompt-chip" data-prompt="Lower blood pressure naturally?">
-                                <i class="fas fa-heart-circle-bolt"></i> BP
+                                <i class="fas fa-gauge-high"></i> Blood Pressure
                             </button>
                             <button class="prompt-chip" data-prompt="Common cold remedies?">
                                 <i class="fas fa-temperature-high"></i> Cold
@@ -140,50 +155,54 @@
                     </div>
 
                     <div class="disclaimer">
-                        <i class="fas fa-info-circle"></i>
-                        <span>For informational purposes only</span>
+                        <i class="fas fa-shield-halved"></i>
+                        <span>For informational purposes only. Always consult a licensed physician.</span>
                     </div>
+
                 </div>
             </aside>
-
-            <!-- Chat Area -->
             <main class="chat-area">
-                <!-- Chat Header -->
+
                 <div class="chat-header">
                     <div class="assistant">
                         <div class="assistant-avatar">
                             <i class="fas fa-robot"></i>
-                            <span class="status"></span>
+                            <span class="status-dot"></span>
                         </div>
                         <div class="assistant-info">
                             <h2>MediGuide AI</h2>
-                            <p><span class="dot"></span> Online · Medical Assistant</p>
+                            <p><span class="live-indicator"></span> Online &middot; Medical Assistant</p>
                         </div>
                     </div>
-                    <div class="chat-stats">
-                        <div class="stat"><span>5</span> Sources</div>
-                        <div class="stat"><span>24/7</span> Available</div>
+                    <div class="chat-meta">
+                        <div class="meta-pill"><i class="fas fa-database"></i> 5 Sources</div>
+                        <div class="meta-pill"><i class="fas fa-clock"></i> 24/7</div>
                     </div>
                 </div>
 
-                <!-- Messages Container -->
                 <div class="messages" id="messages">
-                    <!-- Welcome Message -->
-                    <div class="message welcome">
-                        <div class="avatar">
-                            <i class="fas fa-robot"></i>
-                        </div>
-                        <div class="bubble-container">
-                            <div class="bubble bot">
-                                👋 Hi, I'm MediGuide AI. I can help with medical questions using 5 encyclopedias.
+
+                    <div class="welcome-card">
+                        <div class="wc-header">
+                            <div class="wc-avatar"><i class="fas fa-robot"></i></div>
+                            <div class="wc-titles">
+                                <h3>MediGuide AI</h3>
+                                <span><i class="fas fa-circle-check"></i> Medical Intelligence · 5 Encyclopedia Sources</span>
                             </div>
-                            <span class="time">Just now</span>
+                        </div>
+                        <p class="wc-body">&#x1F44B; Hi there! I'm your personal medical AI assistant. Ask me about symptoms, diagnoses, treatments, medications, or wellness tips &mdash; I'll give you clear, evidence-based answers from trusted medical encyclopedias.</p>
+                        <div class="wc-capabilities">
+                            <div class="wc-cap"><i class="fas fa-stethoscope"></i> Diagnose symptoms</div>
+                            <div class="wc-cap"><i class="fas fa-pills"></i> Medications</div>
+                            <div class="wc-cap"><i class="fas fa-heart-pulse"></i> Wellness tips</div>
+                            <div class="wc-cap"><i class="fas fa-baby"></i> Pediatrics</div>
                         </div>
                     </div>
 
-                    <!-- Quick Suggestions -->
                     <div class="suggestions">
-                        <p class="suggestions-label">Try asking:</p>
+                        <p class="suggestions-label">
+                            <i class="fas fa-sparkles"></i> Suggested questions
+                        </p>
                         <div class="suggestions-list">
                             <button class="suggestion" data-prompt="Early signs of diabetes?">
                                 <i class="fas fa-droplet"></i> Diabetes signs
@@ -199,69 +218,91 @@
                             </button>
                         </div>
                     </div>
-                </div>
 
-                <!-- Typing Indicator -->
+                </div>
                 <div class="typing" id="typingIndicator">
-                    <div class="avatar small">
+                    <div class="avatar bot-avatar small">
                         <i class="fas fa-robot"></i>
                     </div>
-                    <div class="dots">
+                    <div class="typing-bubble">
                         <span></span>
                         <span></span>
                         <span></span>
                     </div>
                 </div>
-
-                <!-- Input Area -->
                 <div class="input-area">
-                    <form id="messageForm">
+                    <form id="messageForm" autocomplete="off">
                         <div class="input-wrapper">
-                            <textarea 
+                            <div class="input-icon"><i class="fas fa-comment-medical"></i></div>
+                            <textarea
                                 id="userInput"
                                 class="input-field"
-                                placeholder="Ask about symptoms, conditions..."
+                                placeholder="Ask about symptoms, conditions, treatments..."
                                 rows="1"
+                                aria-label="Type your medical question"
                             ></textarea>
-                            <button type="submit" class="send-button" id="sendBtn" aria-label="Send">
+                            <button type="submit" class="send-button" id="sendBtn" aria-label="Send message">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                         </div>
+                        <p class="input-hint">Shift + Enter for new line &middot; Enter to send</p>
                     </form>
                 </div>
+
             </main>
         </div>
     </div>
-
-    <!-- Settings Modal -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Settings</h3>
-                <button class="modal-close">&times;</button>
+                <div class="modal-title">
+                    <i class="fas fa-sliders"></i>
+                    <h3>Settings</h3>
+                </div>
+                <button class="modal-close" aria-label="Close">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="setting-item">
-                    <span>Theme</span>
+                    <div class="setting-label">
+                        <i class="fas fa-palette"></i>
+                        <span>Appearance</span>
+                    </div>
                     <div class="theme-selector">
-                        <button class="theme-option active" data-theme="light">Light</button>
-                        <button class="theme-option" data-theme="dark">Dark</button>
+                        <button class="theme-option active" data-theme="light">
+                            <i class="fas fa-sun"></i> Light
+                        </button>
+                        <button class="theme-option" data-theme="dark">
+                            <i class="fas fa-moon"></i> Dark
+                        </button>
                     </div>
                 </div>
                 <div class="setting-item">
-                    <span>Send with Enter</span>
+                    <div class="setting-label">
+                        <i class="fas fa-keyboard"></i>
+                        <span>Send with Enter</span>
+                    </div>
                     <label class="switch">
                         <input type="checkbox" id="enterToSend" checked>
                         <span class="slider"></span>
                     </label>
                 </div>
+                <div class="setting-item setting-info">
+                    <div class="setting-label">
+                        <i class="fas fa-circle-info"></i>
+                        <span>Version</span>
+                    </div>
+                    <span class="setting-value">MediGuide AI v2.0 </Br> Built by Riflan Mohamed 2025</span>
+                            <!-- <span class="setting-value">Built by Riflan Mohamed 2025</span> -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <i class="fas fa-shield-halved"></i>
+                <span>Medical information for reference only. Not a substitute for professional care.</span>
             </div>
         </div>
     </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // ========== DOM Elements ==========
             const body = document.body;
             const themeToggle = document.getElementById('themeToggle');
             const menuButton = document.getElementById('menuButton');
@@ -276,12 +317,10 @@
             const typingIndicator = document.getElementById('typingIndicator');
             const settingsBtn = document.getElementById('settingsBtn');
             const settingsModal = document.getElementById('settingsModal');
-            
-            // ========== State ==========
+
             let isTyping = false;
             let messageCount = 0;
 
-            // ========== Theme Management ==========
             const savedTheme = localStorage.getItem('mediguide-theme') || 'light';
             body.className = savedTheme + '-theme';
             updateThemeIcon(savedTheme);
@@ -310,7 +349,6 @@
                 }
             });
 
-            // ========== Mobile Drawer ==========
             function copySidebarToDrawer() {
                 const desktopSidebar = document.querySelector('.desktop-sidebar .knowledge-panel');
                 if (desktopSidebar && drawerContent) {
@@ -336,44 +374,37 @@
             closeDrawer.addEventListener('click', closeDrawerFunc);
             overlay.addEventListener('click', closeDrawerFunc);
 
-            // ========== Message Functions ==========
             function getTime() {
                 return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             }
 
             function addMessage(text, isUser = false) {
                 const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${isUser ? 'user' : ''}`;
-                
+                messageDiv.className = 'message' + (isUser ? ' user' : '');
+
                 if (isUser) {
-                    messageDiv.innerHTML = `
-                        <div class="bubble-container user">
-                            <div class="bubble user">${text}</div>
-                            <span class="time">${getTime()}</span>
-                        </div>
-                        <div class="avatar user">
-                            <i class="fas fa-user"></i>
-                        </div>
-                    `;
+                    messageDiv.innerHTML =
+                        '<div class="bubble-container user-container">' +
+                            '<div class="bubble user-bubble">' + text + '</div>' +
+                            '<span class="time-stamp">' + getTime() + '</span>' +
+                        '</div>' +
+                        '<div class="avatar user-avatar"><i class="fas fa-user-circle"></i></div>';
                 } else {
-                    messageDiv.innerHTML = `
-                        <div class="avatar">
-                            <i class="fas fa-robot"></i>
-                        </div>
-                        <div class="bubble-container">
-                            <div class="bubble bot">${text}</div>
-                            <span class="time">${getTime()}</span>
-                        </div>
-                    `;
+                    messageDiv.innerHTML =
+                        '<div class="avatar bot-avatar"><i class="fas fa-robot"></i></div>' +
+                        '<div class="bubble-container">' +
+                            '<div class="bubble bot-bubble">' + text + '</div>' +
+                            '<span class="time-stamp">' + getTime() + '</span>' +
+                        '</div>';
                 }
-                
+
                 messages.appendChild(messageDiv);
                 scrollToBottom();
                 messageCount++;
 
                 if (messageCount === 1 && isUser) {
-                    const suggestions = document.querySelector('.suggestions');
-                    const welcome = document.querySelector('.message.welcome');
+                    var suggestions = document.querySelector('.suggestions');
+                    var welcome = document.querySelector('.welcome-card');
                     if (suggestions) suggestions.style.display = 'none';
                     if (welcome) welcome.style.display = 'none';
                 }
@@ -392,70 +423,54 @@
             }
 
             function scrollToBottom() {
-                messages.scrollTo({
-                    top: messages.scrollHeight,
-                    behavior: 'smooth'
-                });
+                messages.scrollTo({ top: messages.scrollHeight, behavior: 'smooth' });
             }
 
-            // ========== Auto-resize Textarea ==========
             function autoResize() {
                 userInput.style.height = 'auto';
                 userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
             }
             userInput.addEventListener('input', autoResize);
 
-            // ========== Send Message ==========
             async function sendMessage(message) {
                 try {
                     showTyping();
-                    
-                    const response = await fetch('/get', {
+                    var response = await fetch('/get', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                         body: new URLSearchParams({ msg: message })
                     });
-                    
-                    const data = await response.text();
-                    
+                    var data = await response.text();
                     hideTyping();
                     addMessage(data, false);
-                    
                 } catch (error) {
                     hideTyping();
-                    addMessage("Connection issue. Please try again.", false);
+                    addMessage('Connection issue. Please check your connection and try again.', false);
                 }
             }
 
             messageForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                
-                const message = userInput.value.trim();
+                var message = userInput.value.trim();
                 if (!message || isTyping) return;
-                
                 addMessage(message, true);
                 userInput.value = '';
                 autoResize();
-                
                 sendMessage(message);
             });
 
-            // ========== Prompt Handling ==========
             function attachPromptEvents(container) {
                 if (!container) return;
-                
-                container.querySelectorAll('.category-item, .prompt-chip, .suggestion').forEach(item => {
+                container.querySelectorAll('.category-item, .prompt-chip, .suggestion').forEach(function(item) {
                     item.addEventListener('click', function(e) {
                         e.preventDefault();
-                        let prompt = '';
-                        
+                        var prompt = '';
                         if (this.classList.contains('category-item')) {
-                            const strong = this.querySelector('strong');
-                            prompt = this.dataset.prompt || `Tell me about ${strong?.textContent || 'this topic'}`;
+                            var strong = this.querySelector('strong');
+                            prompt = this.dataset.prompt || ('Tell me about ' + (strong ? strong.textContent : 'this topic'));
                         } else {
-                            prompt = this.dataset.prompt || this.textContent.trim().replace(/[✚]/g, '').trim();
+                            prompt = this.dataset.prompt || this.textContent.trim().replace(/[+-]/g, '').trim();
                         }
-                        
                         if (prompt) {
                             userInput.value = prompt;
                             autoResize();
@@ -468,51 +483,47 @@
 
             attachPromptEvents(document);
 
-            // ========== New Chat ==========
             newChatBtn.addEventListener('click', function() {
-                messages.innerHTML = `
-                    <div class="message welcome">
-                        <div class="avatar">
-                            <i class="fas fa-robot"></i>
-                        </div>
-                        <div class="bubble-container">
-                            <div class="bubble bot">
-                                👋 Hi, I'm MediGuide AI. I can help with medical questions using 5 encyclopedias.
-                            </div>
-                            <span class="time">Just now</span>
-                        </div>
-                    </div>
-                    <div class="suggestions">
-                        <p class="suggestions-label">Try asking:</p>
-                        <div class="suggestions-list">
-                            <button class="suggestion" data-prompt="Early signs of diabetes?">
-                                <i class="fas fa-droplet"></i> Diabetes signs
-                            </button>
-                            <button class="suggestion" data-prompt="Anxiety relief techniques?">
-                                <i class="fas fa-heart"></i> Anxiety relief
-                            </button>
-                            <button class="suggestion" data-prompt="Child fever treatment?">
-                                <i class="fas fa-baby"></i> Child fever
-                            </button>
-                            <button class="suggestion" data-prompt="Best diet for high BP?">
-                                <i class="fas fa-heart-pulse"></i> BP diet
-                            </button>
-                        </div>
-                    </div>
-                `;
-                
+                messages.innerHTML =
+                    '<div class="welcome-card">' +
+                        '<div class="wc-header">' +
+                            '<div class="wc-avatar"><i class="fas fa-robot"></i></div>' +
+                            '<div class="wc-titles">' +
+                                '<h3>MediGuide AI</h3>' +
+                                '<span><i class="fas fa-circle-check"></i> Medical Intelligence &middot; 5 Encyclopedia Sources</span>' +
+                            '</div>' +
+                        '</div>' +
+                        '<p class="wc-body">&#x1F44B; Hi there! I\'m your personal medical AI assistant. Ask me about symptoms, diagnoses, treatments, medications, or wellness tips &mdash; I\'ll give you clear, evidence-based answers from trusted medical encyclopedias.</p>' +
+                        '<div class="wc-capabilities">' +
+                            '<div class="wc-cap"><i class="fas fa-stethoscope"></i> Diagnose symptoms</div>' +
+                            '<div class="wc-cap"><i class="fas fa-pills"></i> Medications</div>' +
+                            '<div class="wc-cap"><i class="fas fa-heart-pulse"></i> Wellness tips</div>' +
+                            '<div class="wc-cap"><i class="fas fa-baby"></i> Pediatrics</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="suggestions">' +
+                        '<p class="suggestions-label"><i class="fas fa-sparkles"></i> Suggested questions</p>' +
+                        '<div class="suggestions-list">' +
+                            '<button class="suggestion" data-prompt="Early signs of diabetes?"><i class="fas fa-droplet"></i> Diabetes signs</button>' +
+                            '<button class="suggestion" data-prompt="Anxiety relief techniques?"><i class="fas fa-heart"></i> Anxiety relief</button>' +
+                            '<button class="suggestion" data-prompt="Child fever treatment?"><i class="fas fa-baby"></i> Child fever</button>' +
+                            '<button class="suggestion" data-prompt="Best diet for high BP?"><i class="fas fa-heart-pulse"></i> BP diet</button>' +
+                        '</div>' +
+                    '</div>';
                 messageCount = 0;
                 attachPromptEvents(document);
             });
 
-            // ========== Settings Modal ==========
             settingsBtn.addEventListener('click', function() {
                 settingsModal.style.display = 'flex';
             });
 
-            document.querySelector('.modal-close')?.addEventListener('click', function() {
-                settingsModal.style.display = 'none';
-            });
+            var modalClose = document.querySelector('.modal-close');
+            if (modalClose) {
+                modalClose.addEventListener('click', function() {
+                    settingsModal.style.display = 'none';
+                });
+            }
 
             window.addEventListener('click', function(e) {
                 if (e.target === settingsModal) {
@@ -520,22 +531,21 @@
                 }
             });
 
-            document.querySelectorAll('.theme-option').forEach(btn => {
+            document.querySelectorAll('.theme-option').forEach(function(btn) {
                 btn.addEventListener('click', function() {
-                    document.querySelectorAll('.theme-option').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.theme-option').forEach(function(b) { b.classList.remove('active'); });
                     this.classList.add('active');
-                    
-                    const theme = this.dataset.theme;
+                    var theme = this.dataset.theme;
                     body.className = theme + '-theme';
                     localStorage.setItem('mediguide-theme', theme);
                     updateThemeIcon(theme);
                 });
             });
 
-            const enterToSend = document.getElementById('enterToSend');
+            var enterToSend = document.getElementById('enterToSend');
             userInput.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' && !e.shiftKey) {
-                    if (enterToSend?.checked) {
+                    if (enterToSend && enterToSend.checked) {
                         e.preventDefault();
                         messageForm.dispatchEvent(new Event('submit'));
                     }
@@ -543,13 +553,13 @@
             });
 
             window.addEventListener('resize', function() {
-                if (window.innerWidth > 992) {
-                    closeDrawerFunc();
-                }
+                if (window.innerWidth > 992) closeDrawerFunc();
             });
 
             userInput.focus();
         });
     </script>
+
+    <!-- Built by Riflan Mohamed 2025 -->
 </body>
 </html>
