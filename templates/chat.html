@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="icon" href="../static/mg.png" type="image/png">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta name="theme-color" content="#0a0f1e">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -320,6 +320,15 @@
             let isTyping = false;
             let messageCount = 0;
 
+            function escapeHtml(str) {
+                var d = document.createElement('div');
+                d.textContent = str;
+                return d.innerHTML;
+            }
+            function formatMessage(str) {
+                return escapeHtml(str).replace(/\n/g, '<br>');
+            }
+
             const savedTheme = localStorage.getItem('mediguide-theme') || 'light';
             body.className = savedTheme + '-theme';
             updateThemeIcon(savedTheme);
@@ -373,6 +382,17 @@
             closeDrawer.addEventListener('click', closeDrawerFunc);
             overlay.addEventListener('click', closeDrawerFunc);
 
+            var _swipeX = 0, _swipeY = 0;
+            drawer.addEventListener('touchstart', function(e) {
+                _swipeX = e.touches[0].clientX;
+                _swipeY = e.touches[0].clientY;
+            }, { passive: true });
+            drawer.addEventListener('touchend', function(e) {
+                var dx = _swipeX - e.changedTouches[0].clientX;
+                var dy = Math.abs(e.changedTouches[0].clientY - _swipeY);
+                if (dx > 60 && dy < 100) closeDrawerFunc();
+            }, { passive: true });
+
             function getTime() {
                 return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             }
@@ -384,7 +404,7 @@
                 if (isUser) {
                     messageDiv.innerHTML =
                         '<div class="bubble-container user-container">' +
-                            '<div class="bubble user-bubble">' + text + '</div>' +
+                            '<div class="bubble user-bubble">' + escapeHtml(text) + '</div>' +
                             '<span class="time-stamp">' + getTime() + '</span>' +
                         '</div>' +
                         '<div class="avatar user-avatar"><i class="fas fa-user-circle"></i></div>';
@@ -392,7 +412,7 @@
                     messageDiv.innerHTML =
                         '<div class="avatar bot-avatar"><i class="fas fa-robot"></i></div>' +
                         '<div class="bubble-container">' +
-                            '<div class="bubble bot-bubble">' + text + '</div>' +
+                            '<div class="bubble bot-bubble">' + formatMessage(text) + '</div>' +
                             '<span class="time-stamp">' + getTime() + '</span>' +
                         '</div>';
                 }
@@ -422,7 +442,7 @@
             }
 
             function scrollToBottom() {
-                messages.scrollTo({ top: messages.scrollHeight, behavior: 'smooth' });
+                messages.scrollTo({ top: messages.scrollHeight, behavior: 'ontouchstart' in window ? 'auto' : 'smooth' });
             }
 
             function autoResize() {
@@ -430,6 +450,9 @@
                 userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
             }
             userInput.addEventListener('input', autoResize);
+            userInput.addEventListener('focus', function() {
+                if ('ontouchstart' in window) setTimeout(scrollToBottom, 350);
+            });
 
             async function sendMessage(message) {
                 try {
@@ -555,7 +578,9 @@
                 if (window.innerWidth > 992) closeDrawerFunc();
             });
 
-            userInput.focus();
+            if (!('ontouchstart' in window) && window.innerWidth > 768) {
+                userInput.focus();
+            }
         });
     </script>
 
